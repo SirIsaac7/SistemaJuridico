@@ -1,0 +1,364 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+/*
+  Estilos exclusivos de la landing pública de Normativa Virtual.
+  Todo está bajo el prefijo .lj- para no interferir con el tema del dashboard.
+
+  Paleta: recorrido continuo de violeta profundo a blanco, con turquesa de
+  acento. Las secciones claras son la norma; Hero, Planes, CTA y pie de página
+  son las bandas saturadas que marcan el ritmo.
+*/
+
+.lj-landing {
+  --lj-violeta-profundo: #2e1065;
+  --lj-violeta: #4c1d95;
+  --lj-indigo: #4f46e5;
+  --lj-indigo-claro: #6366f1;
+  --lj-violeta-vivo: #7c3aed;
+  --lj-azul: #3b82f6;
+  --lj-celeste: #7dd3fc;
+  --lj-turquesa: #5eead4;
+  --lj-azul-palido: #cfe3fb;
+  --lj-nube: #e8f1fe;
+  --lj-claro: #f8fafc;
+
+  background: var(--lj-claro);
+  color: #0f172a;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Desplazamiento suave y barra de scroll índigo solo con la landing visible */
+html:has(.lj-landing) {
+  scroll-behavior: smooth;
+}
+
+html:has(.lj-landing)::-webkit-scrollbar {
+  width: 9px;
+}
+
+html:has(.lj-landing)::-webkit-scrollbar-track {
+  background: #e8f1fe;
+  border-left: 1px solid rgba(79, 70, 229, 0.12);
+}
+
+html:has(.lj-landing)::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6366f1 0%, #4f46e5 45%, #7c3aed 100%);
+  border-radius: 8px;
+  border: 2px solid #e8f1fe;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+html:has(.lj-landing)::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #818cf8 0%, #6366f1 45%, #7c3aed 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 0 10px rgba(99, 102, 241, 0.55);
+}
+
+/* Firefox */
+html:has(.lj-landing) {
+  scrollbar-width: thin;
+  scrollbar-color: #4f46e5 #e8f1fe;
+}
+
+.lj-landing ::selection {
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+/* Tipografía de títulos */
+.lj-font-heading {
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+
+/* Ritmo vertical de las secciones */
+.lj-section {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+@media (min-width: 768px) {
+  .lj-section {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .lj-section {
+    padding-top: 7.5rem;
+    padding-bottom: 7.5rem;
+  }
+}
+
+/* Contenedor principal */
+.lj-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .lj-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .lj-container {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .lj-container {
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+}
+
+/* ===== Texto con degradado ===== */
+
+/* Sobre fondo claro */
+.lj-gradient-indigo {
+  background: linear-gradient(100deg, #4f46e5 0%, #7c3aed 55%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Sobre fondo violeta */
+.lj-gradient-claro {
+  background: linear-gradient(100deg, #a5f3fc 0%, #bfdbfe 45%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== Vidrio esmerilado ===== */
+
+/* Tarjeta de vidrio sobre fondo claro */
+.lj-glass {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 24px 60px -22px rgba(30, 41, 99, 0.35);
+}
+
+/* Tarjeta de vidrio sobre fondo violeta */
+.lj-glass-oscuro {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Reflejo diagonal fijo sobre el vidrio */
+.lj-glass-sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 42%);
+  pointer-events: none;
+}
+
+/* Las ondas animadas (`.onda`) viven en globals.css: las comparten la landing
+   y las pantallas de acceso. */
+
+/* ===== Movimiento ===== */
+
+/* Marquesina de áreas de práctica */
+@keyframes lj-marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.lj-marquee {
+  animation: lj-marquee 28s linear infinite;
+}
+
+/*
+  Cinta de banderas del hero. La pista lleva tres copias idénticas de la lista
+  y recorre justo un tercio: al acabar la vuelta, la segunda copia está donde
+  arrancó la primera y el bucle no tiene costura. Solo se anima `transform`,
+  así que compone en GPU.
+*/
+@keyframes lj-cinta {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-33.3333%, 0, 0);
+  }
+}
+
+.lj-cinta {
+  animation: lj-cinta var(--lj-dur, 40s) linear infinite;
+  will-change: transform;
+}
+
+/* El desfile se detiene mientras el visitante mira o tabula una bandera */
+.lj-cinta:hover,
+.lj-cinta:focus-within {
+  animation-play-state: paused;
+}
+
+/*
+  Las orillas se desvanecen con máscara y no con degradados de color: el fondo
+  del hero es un degradado vivo, así que cualquier franja sólida se notaría.
+*/
+.lj-cinta-mascara {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
+}
+
+/*
+  Flotación perpetua de la tarjeta destacada. Va en un nodo interno propio para
+  no pelear con el `transform` en línea que Framer Motion aplica en el hover.
+*/
+@keyframes lj-plan-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.lj-plan-float {
+  animation: lj-plan-float 6.5s ease-in-out infinite;
+}
+
+/* Respiración lenta de los halos de acento (anima solo opacity) */
+@keyframes lj-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.lj-breathe {
+  animation: lj-breathe 5.5s ease-in-out infinite;
+}
+
+/* Brillo que se desplaza sobre un botón al pasar el mouse (anima solo transform) */
+.lj-btn-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 45%;
+  background: linear-gradient(100deg, transparent 15%, rgba(255, 255, 255, 0.45) 50%, transparent 85%);
+  transform: skewX(-18deg) translateX(0);
+  transition: transform 0.65s ease;
+  pointer-events: none;
+}
+
+.lj-btn-shine:hover::after,
+.lj-btn-shine:focus-visible::after {
+  transform: skewX(-18deg) translateX(420%);
+}
+
+/* Contenido de acordeón (FAQ) */
+.lj-accordion-content {
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+/* ===== Hero: partículas jurídicas y destellos ===== */
+
+/*
+  Flotación lenta de glifos (§, ¶) y documentos abstractos del hero.
+  Cada elemento fija su ritmo con las variables --lj-dur y --lj-retraso;
+  solo se anima transform, así que compone en GPU.
+*/
+@keyframes lj-hero-flotar {
+  from {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  to {
+    transform: translateY(-18px) rotate(5deg);
+  }
+}
+
+.lj-hero-flotante {
+  animation: lj-hero-flotar var(--lj-dur, 16s) ease-in-out infinite alternate;
+  animation-delay: var(--lj-retraso, 0s);
+  will-change: transform;
+}
+
+/* Puntos de luz que parpadean suavemente */
+@keyframes lj-destello {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+}
+
+.lj-destello {
+  animation: lj-destello var(--lj-dur, 5s) ease-in-out infinite;
+  animation-delay: var(--lj-retraso, 0s);
+}
+
+/* Accesibilidad: sin animaciones decorativas si el usuario reduce el movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .lj-plan-float,
+  .lj-marquee,
+  .lj-hero-flotante {
+    animation: none;
+  }
+
+  /* La cinta de banderas se queda quieta y se puede recorrer a mano */
+  .lj-cinta {
+    animation: none;
+  }
+
+  .lj-cinta-mascara {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .lj-cinta-mascara::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lj-destello {
+    animation: none;
+    opacity: 0.3;
+    transform: none;
+  }
+
+  .lj-breathe {
+    animation: none;
+    opacity: 0.55;
+  }
+
+  .lj-btn-shine::after {
+    display: none;
+  }
+}

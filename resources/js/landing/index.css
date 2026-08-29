@@ -1,0 +1,82 @@
+@reference '../../css/app.css';
+
+html {
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+}
+
+@keyframes onda-deriva {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.onda {
+  width: 200%;
+  animation-name: onda-deriva;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+.onda--a {
+  animation-duration: 34s;
+}
+
+.onda--b {
+  animation-duration: 48s;
+  animation-direction: reverse;
+}
+
+.onda--c {
+  animation-duration: 62s;
+}
+
+.onda--d {
+  animation-duration: 78s;
+  animation-direction: reverse;
+}
+
+.cj-aurora-text {
+  background-size: 300% 300%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation-name: cj-aurora-flow;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes cj-aurora-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onda {
+    animation: none;
+  }
+
+  .cj-aurora-text {
+    animation: none;
+    background-position: 50% 50%;
+  }
+}
