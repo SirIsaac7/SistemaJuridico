@@ -3,12 +3,11 @@ import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
+import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
 
 interface LoginForm extends Record<string, string | boolean> {
     email: string;
@@ -36,13 +35,21 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     };
 
     return (
-        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
-            <Head title="Log in" />
+        <AuthSplitLayout view="login" title="Bienvenido de nuevo" description="Ingresa tus credenciales para acceder a Sistema Jurídico.">
+            <Head title="Iniciar sesión" />
 
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
+            {status && (
+                <div className="mb-5 rounded-md bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+                    {status}
+                </div>
+            )}
+
+            <form className="flex flex-col gap-5" onSubmit={submit}>
+                <div className="grid gap-5">
                     <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
+                        <Label htmlFor="email" className="font-semibold text-[#2a3547] dark:text-white">
+                            Correo electrónico
+                        </Label>
                         <Input
                             id="email"
                             type="email"
@@ -52,18 +59,25 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             autoComplete="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
-                            placeholder="email@example.com"
+                            placeholder="nombre@ejemplo.com"
+                            className="h-11 border-[#dfe5ef] bg-white focus-visible:border-[#5d87ff] focus-visible:ring-[#5d87ff]/20 dark:border-[#465670] dark:bg-[#1c2536]"
                         />
                         <InputError message={errors.email} />
                     </div>
 
                     <div className="grid gap-2">
                         <div className="flex items-center">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password" className="font-semibold text-[#2a3547] dark:text-white">
+                                Contraseña
+                            </Label>
                             {canResetPassword && (
-                                <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    Forgot password?
-                                </TextLink>
+                                <a
+                                    href={route('password.request')}
+                                    className="ml-auto rounded-md px-2 py-1 text-sm font-semibold text-[#5d87ff] transition-colors hover:bg-[#5d87ff]/10 hover:text-[#4f75e6] focus-visible:ring-2 focus-visible:ring-[#5d87ff]/30 focus-visible:outline-none"
+                                    tabIndex={5}
+                                >
+                                    ¿Olvidaste tu contraseña?
+                                </a>
                             )}
                         </div>
                         <Input
@@ -74,31 +88,43 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             autoComplete="current-password"
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
-                            placeholder="Password"
+                            placeholder="Ingresa tu contraseña"
+                            className="h-11 border-[#dfe5ef] bg-white focus-visible:border-[#5d87ff] focus-visible:ring-[#5d87ff]/20 dark:border-[#465670] dark:bg-[#1c2536]"
                         />
                         <InputError message={errors.password} />
                     </div>
 
                     <div className="flex items-center space-x-3">
-                        <Checkbox id="remember" name="remember" tabIndex={3} />
-                        <Label htmlFor="remember">Remember me</Label>
+                        <Checkbox
+                            id="remember"
+                            name="remember"
+                            tabIndex={3}
+                            checked={data.remember}
+                            onCheckedChange={(checked) => setData('remember', checked === true)}
+                            className="border-[#c5cfdd] data-[state=checked]:border-[#5d87ff] data-[state=checked]:bg-[#5d87ff]"
+                        />
+                        <Label htmlFor="remember" className="cursor-pointer font-normal text-[#2a3547] dark:text-[#d5deeb]">
+                            Recordar este dispositivo
+                        </Label>
                     </div>
 
-                    <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
+                    <Button type="submit" className="mt-2 h-11 w-full bg-[#5d87ff] text-white hover:bg-[#4f75e6]" tabIndex={4} disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Log in
+                        Iniciar sesión
                     </Button>
                 </div>
 
-                <div className="text-muted-foreground text-center text-sm">
-                    Don't have an account?{' '}
-                    <TextLink href={route('register')} tabIndex={5}>
-                        Sign up
-                    </TextLink>
+                <div className="text-center text-sm text-[#7c8fac]">
+                    ¿Aún no tienes una cuenta?{' '}
+                    <a
+                        href={route('register')}
+                        className="font-semibold text-[#5d87ff] transition-colors hover:text-[#4f75e6] hover:underline"
+                        tabIndex={5}
+                    >
+                        Crear una cuenta
+                    </a>
                 </div>
             </form>
-
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
-        </AuthLayout>
+        </AuthSplitLayout>
     );
 }
