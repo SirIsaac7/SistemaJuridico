@@ -1,40 +1,62 @@
-import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
+import { NavMain, type SidebarNavSection } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const navSections: SidebarNavSection[] = [
     {
-        title: 'Dashboard',
-        url: '/dashboard',
-        icon: LayoutGrid,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        url: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
+        title: 'Inicio',
+        items: [
+            {
+                title: 'Panel principal',
+                href: '/dashboard',
+                icon: 'solar:widget-2-linear',
+            },
+        ],
     },
     {
-        title: 'Documentation',
-        url: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
+        title: 'Gestión jurídica',
+        items: [
+            {
+                title: 'Expedientes',
+                icon: 'solar:server-linear',
+                children: [{ title: 'Todos' }, { title: 'Activos' }, { title: 'Archivados' }],
+            },
+            { title: 'Clientes', icon: 'solar:user-circle-linear' },
+            { title: 'Audiencias', icon: 'solar:calendar-linear' },
+            { title: 'Calendario', icon: 'solar:calendar-date-linear' },
+        ],
+    },
+    {
+        title: 'Documentación',
+        items: [
+            { title: 'Documentos', icon: 'solar:documents-linear' },
+            { title: 'Normativa', icon: 'solar:notes-linear' },
+            { title: 'Notificaciones', icon: 'solar:bell-linear' },
+        ],
+    },
+    {
+        title: 'Herramientas',
+        items: [
+            { title: 'Buscador normativo', icon: 'solar:magnifer-linear' },
+            { title: 'Generador de escritos', icon: 'solar:document-add-linear' },
+            { title: 'Analítica jurídica', icon: 'solar:pie-chart-2-linear' },
+        ],
     },
 ];
 
 export function AppSidebar() {
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+        <Sidebar collapsible="icon" variant="sidebar" className="border-border bg-sidebar border-r">
+            <SidebarHeader className="h-[86px] justify-center px-6 group-data-[collapsible=icon]:px-2">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
+                        <SidebarMenuButton
+                            size="lg"
+                            asChild
+                            className="h-14 gap-3 p-0 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-11! hover:bg-transparent data-[state=open]:bg-transparent"
+                        >
                             <Link href="/dashboard" prefetch>
                                 <AppLogo />
                             </Link>
@@ -43,12 +65,11 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
-                <NavMain items={mainNavItems} />
+            <SidebarContent className="gap-0 overflow-y-auto pb-4 [scrollbar-color:color-mix(in_oklab,var(--sidebar-foreground)_18%,transparent)_transparent] [scrollbar-width:thin]">
+                <NavMain sections={navSections} />
             </SidebarContent>
 
-            <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+            <SidebarFooter className="border-sidebar-border border-t px-4 py-4 group-data-[collapsible=icon]:px-2">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

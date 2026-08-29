@@ -1,13 +1,14 @@
-import AppLogoIcon from './app-logo-icon';
+import { Scale } from 'lucide-react';
 
 export default function AppLogo() {
     return (
         <>
-            <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md">
-                <AppLogoIcon className="size-5 fill-current text-white dark:text-black" />
+            <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-[#5d87ff]/10 text-[#5d87ff]">
+                <Scale className="size-6" strokeWidth={1.8} />
             </div>
-            <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-none font-semibold">Laravel Starter Kit</span>
+            <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
+                <span className="text-foreground truncate text-base font-bold tracking-tight">Sistema Jurídico</span>
+                <span className="text-muted-foreground truncate text-[11px] font-medium tracking-[0.16em] uppercase">Gestión legal</span>
             </div>
         </>
     );

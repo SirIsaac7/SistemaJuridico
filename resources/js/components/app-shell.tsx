@@ -1,5 +1,5 @@
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 
 interface AppShellProps {
     children: React.ReactNode;
@@ -22,7 +22,13 @@ export function AppShell({ children, variant = 'header' }: AppShellProps) {
     }
 
     return (
-        <SidebarProvider defaultOpen={isOpen} open={isOpen} onOpenChange={handleSidebarChange}>
+        <SidebarProvider
+            className="tailwind-admin-shell bg-background text-foreground"
+            defaultOpen={isOpen}
+            open={isOpen}
+            onOpenChange={handleSidebarChange}
+            style={{ '--sidebar-width': '270px', '--sidebar-width-icon': '76px' } as CSSProperties}
+        >
             {children}
         </SidebarProvider>
     );
