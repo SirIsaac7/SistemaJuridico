@@ -7,12 +7,14 @@ import { ChevronRight } from 'lucide-react';
 interface SidebarNavChild {
     title: string;
     href?: string;
+    permission?: string;
 }
 
 export interface SidebarNavItem {
     title: string;
     href?: string;
     icon: string;
+    permission?: string;
     children?: SidebarNavChild[];
 }
 
@@ -109,10 +111,22 @@ function NavMenuItem({ item, currentPath }: { item: SidebarNavItem; currentPath:
 export function NavMain({ sections }: { sections: SidebarNavSection[] }) {
     const page = usePage();
     const currentPath = page.url.split('?')[0];
+    const permissions = new Set((page.props as { auth?: { permissions?: string[] } }).auth?.permissions ?? []);
+    const visibleSections = sections
+        .map((section) => ({
+            ...section,
+            items: section.items
+                .filter((item) => !item.permission || permissions.has(item.permission))
+                .map((item) => ({
+                    ...item,
+                    children: item.children?.filter((child) => !child.permission || permissions.has(child.permission)),
+                })),
+        }))
+        .filter((section) => section.items.length > 0);
 
     return (
         <>
-            {sections.map((section) => (
+            {visibleSections.map((section) => (
                 <SidebarGroup key={section.title} className="px-6 py-0 group-data-[collapsible=icon]:px-2">
                     <SidebarGroupLabel className="text-sidebar-foreground mt-5 mb-1 h-8 px-0 text-xs font-bold tracking-normal uppercase group-data-[collapsible=icon]:hidden">
                         {section.title}

@@ -16,6 +16,23 @@ const navSections: SidebarNavSection[] = [
         ],
     },
     {
+        title: 'Administración',
+        items: [
+            {
+                title: 'Usuarios',
+                href: '/users',
+                icon: 'solar:users-group-rounded-linear',
+                permission: 'usuarios.ver',
+            },
+            {
+                title: 'Roles y permisos',
+                href: '/roles',
+                icon: 'solar:shield-user-linear',
+                permission: 'roles.ver',
+            },
+        ],
+    },
+    {
         title: 'Gestión jurídica',
         items: [
             {

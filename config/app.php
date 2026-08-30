@@ -69,6 +69,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Display Timezone
+    |--------------------------------------------------------------------------
+    |
+    | Dates remain stored in UTC and are converted to this timezone only when
+    | they are shown to users. This avoids changing historical timestamps.
+    |
+    */
+
+    'display_timezone' => env('APP_DISPLAY_TIMEZONE', 'America/La_Paz'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------
     |

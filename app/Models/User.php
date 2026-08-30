@@ -3,14 +3,24 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, HasRoles, Notifiable, SoftDeletes;
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'is_active' => true,
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +31,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_active',
     ];
 
     /**
@@ -42,7 +53,19 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'is_active' => 'boolean',
             'password' => 'hashed',
         ];
+    }
+
+    public function isSuperAdministrator(): bool
+    {
+        return $this->hasRole(config('access_control.super_admin_role'));
+    }
+
+    public function isOnlySuperAdministrator(): bool
+    {
+        return $this->isSuperAdministrator()
+            && self::role(config('access_control.super_admin_role'))->count() === 1;
     }
 }
