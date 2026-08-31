@@ -2,6 +2,8 @@
 
 return [
     'super_admin_role' => 'super-administrador',
+    'docente_role' => 'docente',
+    'estudiante_role' => 'estudiante',
 
     'permission_groups' => [
         'roles' => [
@@ -27,6 +29,50 @@ return [
                 ['name' => 'usuarios.restaurar', 'label' => 'Restaurar usuarios'],
                 ['name' => 'usuarios.asignar-roles', 'label' => 'Asignar roles'],
             ],
+        ],
+        'libros' => [
+            'label' => 'Libros',
+            'description' => 'Controla materias, archivos privados y solicitudes de acceso.',
+            'permissions' => [
+                ['name' => 'libros.ver', 'label' => 'Ingresar al módulo Libros'],
+                ['name' => 'libros.catalogo.ver', 'label' => 'Ver el catálogo de materias'],
+                ['name' => 'libros.materias.ver', 'label' => 'Ver materias propias'],
+                ['name' => 'libros.materias.crear', 'label' => 'Crear materias'],
+                ['name' => 'libros.materias.editar', 'label' => 'Editar materias propias'],
+                ['name' => 'libros.materias.cambiar-estado', 'label' => 'Inhabilitar o reactivar materias propias'],
+                ['name' => 'libros.archivos.ver', 'label' => 'Ver archivos propios'],
+                ['name' => 'libros.archivos.subir', 'label' => 'Subir archivos a materias propias'],
+                ['name' => 'libros.archivos.editar', 'label' => 'Editar archivos propios'],
+                ['name' => 'libros.archivos.cambiar-estado', 'label' => 'Inhabilitar o reactivar archivos propios'],
+                ['name' => 'libros.solicitudes.ver-propias', 'label' => 'Ver solicitudes propias'],
+                ['name' => 'libros.solicitudes.crear', 'label' => 'Solicitar acceso a una materia'],
+                ['name' => 'libros.solicitudes.ver-recibidas', 'label' => 'Ver solicitudes recibidas'],
+                ['name' => 'libros.solicitudes.responder', 'label' => 'Aceptar o rechazar solicitudes recibidas'],
+                ['name' => 'libros.accesos.ver-propios', 'label' => 'Ver materias y archivos concedidos'],
+            ],
+        ],
+    ],
+
+    'default_role_permissions' => [
+        'docente' => [
+            'libros.ver',
+            'libros.materias.ver',
+            'libros.materias.crear',
+            'libros.materias.editar',
+            'libros.materias.cambiar-estado',
+            'libros.archivos.ver',
+            'libros.archivos.subir',
+            'libros.archivos.editar',
+            'libros.archivos.cambiar-estado',
+            'libros.solicitudes.ver-recibidas',
+            'libros.solicitudes.responder',
+        ],
+        'estudiante' => [
+            'libros.ver',
+            'libros.catalogo.ver',
+            'libros.solicitudes.ver-propias',
+            'libros.solicitudes.crear',
+            'libros.accesos.ver-propios',
         ],
     ],
 ];

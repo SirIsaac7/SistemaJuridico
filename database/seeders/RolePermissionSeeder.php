@@ -27,6 +27,11 @@ class RolePermissionSeeder extends Seeder
 
         Role::findOrCreate(config('access_control.super_admin_role'), 'web');
 
+        collect(config('access_control.default_role_permissions'))
+            ->each(function (array $permissions, string $roleName): void {
+                Role::findOrCreate($roleName, 'web')->givePermissionTo($permissions);
+            });
+
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

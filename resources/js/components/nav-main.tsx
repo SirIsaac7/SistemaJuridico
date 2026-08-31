@@ -30,7 +30,8 @@ function MenuIcon({ icon }: { icon: string }) {
     return <Icon icon={icon} width={21} height={21} className="shrink-0" />;
 }
 
-function SubmenuItem({ item }: { item: SidebarNavChild }) {
+function SubmenuItem({ item, currentPath }: { item: SidebarNavChild; currentPath: string }) {
+    const isActive = Boolean(item.href && (currentPath === item.href || (item.href !== '/libros' && currentPath.startsWith(`${item.href}/`))));
     const content = (
         <>
             <Icon icon="ri:checkbox-blank-circle-line" width={9} height={9} className="shrink-0" />
@@ -44,7 +45,9 @@ function SubmenuItem({ item }: { item: SidebarNavChild }) {
                 <Link
                     href={item.href}
                     prefetch
-                    className="text-sidebar-foreground flex min-h-8 items-center gap-3 rounded-md px-2.5 py-2 text-sm transition-all duration-200 ease-in-out hover:translate-x-1 hover:text-[#5d87ff]"
+                    className={`flex min-h-8 items-center gap-3 rounded-md px-2.5 py-2 text-sm transition-all duration-200 ease-in-out hover:translate-x-1 hover:text-[#5d87ff] ${
+                        isActive ? 'font-semibold text-[#5d87ff]' : 'text-sidebar-foreground'
+                    }`}
                 >
                     {content}
                 </Link>
@@ -61,7 +64,10 @@ function SubmenuItem({ item }: { item: SidebarNavChild }) {
 }
 
 function NavMenuItem({ item, currentPath }: { item: SidebarNavItem; currentPath: string }) {
-    const isActive = item.href === currentPath;
+    const isActive = Boolean(
+        (item.href && (item.href === currentPath || currentPath.startsWith(`${item.href}/`))) ||
+            item.children?.some((child) => child.href && (child.href === currentPath || currentPath.startsWith(`${child.href}/`))),
+    );
     const content = (
         <>
             <MenuIcon icon={item.icon} />
@@ -71,7 +77,7 @@ function NavMenuItem({ item, currentPath }: { item: SidebarNavItem; currentPath:
 
     if (item.children?.length) {
         return (
-            <Collapsible asChild>
+            <Collapsible asChild defaultOpen={isActive}>
                 <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                         <SidebarMenuButton type="button" tooltip={item.title} className={`${menuButtonClass} group/submenu`}>
@@ -82,7 +88,7 @@ function NavMenuItem({ item, currentPath }: { item: SidebarNavItem; currentPath:
                     <CollapsibleContent className="group-data-[collapsible=icon]:hidden">
                         <ul className="border-sidebar-border mt-1 ml-[21px] flex flex-col gap-0.5 border-l pl-3">
                             {item.children.map((child) => (
-                                <SubmenuItem key={child.title} item={child} />
+                                <SubmenuItem key={`${child.title}-${child.href ?? 'button'}`} item={child} currentPath={currentPath} />
                             ))}
                         </ul>
                     </CollapsibleContent>

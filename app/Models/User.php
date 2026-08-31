@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -67,5 +68,25 @@ class User extends Authenticatable
     {
         return $this->isSuperAdministrator()
             && self::role(config('access_control.super_admin_role'))->count() === 1;
+    }
+
+    public function materiasImpartidas(): HasMany
+    {
+        return $this->hasMany(Materia::class, 'docente_id');
+    }
+
+    public function solicitudesAcceso(): HasMany
+    {
+        return $this->hasMany(SolicitudAcceso::class, 'usuario_id');
+    }
+
+    public function solicitudesRespondidas(): HasMany
+    {
+        return $this->hasMany(SolicitudAcceso::class, 'respondido_por');
+    }
+
+    public function accesosMaterias(): HasMany
+    {
+        return $this->hasMany(AccesoMateria::class, 'usuario_id');
     }
 }
