@@ -12,10 +12,13 @@ const tipos: Array<{ value: TipoArchivo; label: string }> = [
     { value: 'pdf', label: 'PDF' },
     { value: 'video', label: 'Video' },
     { value: 'imagen', label: 'Imagen' },
-    { value: 'flujograma', label: 'Flujograma' },
-    { value: 'documento', label: 'Documento' },
-    { value: 'otro', label: 'Otro' },
 ];
+
+const acceptedFiles: Record<'pdf' | 'video' | 'imagen', string> = {
+    pdf: '.pdf,application/pdf',
+    imagen: '.jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp',
+    video: '.mp4,.m4v,.mov,.webm,.ogv,video/mp4,video/quicktime,video/webm,video/ogg',
+};
 
 interface ArchivoFormDialogProps {
     open: boolean;
@@ -96,7 +99,7 @@ export function ArchivoFormDialog({ open, onOpenChange, materiaId, archivo = nul
 
                         <div className="flex flex-col gap-2">
                             <label className="text-sm font-semibold text-[#2a3547] dark:text-white">Tipo</label>
-                            <Select value={data.tipo} onValueChange={(value: TipoArchivo) => setData('tipo', value)}>
+                            <Select value={data.tipo} disabled={Boolean(archivo)} onValueChange={(value: TipoArchivo) => setData('tipo', value)}>
                                 <SelectTrigger className="h-11">
                                     <SelectValue />
                                 </SelectTrigger>
@@ -119,6 +122,7 @@ export function ArchivoFormDialog({ open, onOpenChange, materiaId, archivo = nul
                                 <Input
                                     id="archivo-file"
                                     type="file"
+                                    accept={acceptedFiles[data.tipo as keyof typeof acceptedFiles]}
                                     onChange={(event) => setData('archivo', event.target.files?.[0] ?? null)}
                                     className="h-11 cursor-pointer pt-2"
                                 />

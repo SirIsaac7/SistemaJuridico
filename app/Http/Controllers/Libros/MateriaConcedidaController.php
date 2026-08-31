@@ -29,6 +29,7 @@ class MateriaConcedidaController extends Controller
             'docente:id,name',
             'archivos' => fn ($archivos) => $archivos
                 ->activos()
+                ->whereIn('tipo', Archivo::TIPOS_VISUALIZABLES)
                 ->orderByDesc('created_at')
                 ->orderByDesc('id'),
         ]);

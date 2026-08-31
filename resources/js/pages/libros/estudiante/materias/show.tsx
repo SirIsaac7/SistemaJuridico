@@ -113,7 +113,7 @@ export default function MateriaConcedidaShow({ materia }: MateriaConcedidaShowPr
 
                                     <Button asChild variant="outline" className="shrink-0">
                                         <a
-                                            href={`/libros/mis-materias/${materia.id}/archivos/${archivo.id}/contenido`}
+                                            href={`/libros/mis-materias/${materia.id}/archivos/${archivo.id}/visor`}
                                             target="_blank"
                                             rel="noreferrer"
                                         >

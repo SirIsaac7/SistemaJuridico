@@ -34,7 +34,7 @@ class StoreArchivoRequest extends FormRequest
         return [
             'titulo' => ['required', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string', 'max:5000'],
-            'tipo' => ['required', 'string', Rule::in(Archivo::TIPOS)],
+            'tipo' => ['required', 'string', Rule::in(Archivo::TIPOS_VISUALIZABLES)],
             'archivo' => [
                 'required',
                 'file',
@@ -76,12 +76,25 @@ class StoreArchivoRequest extends FormRequest
 
                 $extension = Str::lower($archivo->getClientOriginalExtension());
                 $mimeType = Str::lower((string) $archivo->getMimeType());
+                $tipo = (string) $this->input('tipo');
+                $allowed = config("libros.student_preview.allowed_uploads.{$tipo}");
 
                 if (in_array($extension, config('libros.prohibited_extensions'), true)
                     || in_array($mimeType, config('libros.prohibited_mime_types'), true)) {
                     $validator->errors()->add(
                         'archivo',
                         'Este tipo de archivo está bloqueado por seguridad.',
+                    );
+
+                    return;
+                }
+
+                if (! is_array($allowed)
+                    || ! in_array($extension, $allowed['extensions'] ?? [], true)
+                    || ! in_array($mimeType, $allowed['mime_types'] ?? [], true)) {
+                    $validator->errors()->add(
+                        'archivo',
+                        'El archivo seleccionado no corresponde al tipo PDF, imagen o video indicado.',
                     );
                 }
             },

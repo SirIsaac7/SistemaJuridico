@@ -147,7 +147,7 @@ export default function MateriaShow({ materia, can }: MateriaShowProps) {
                 {materia.archivos.length === 0 ? (
                     <EmptyLibrary
                         title="Esta materia todavía no tiene archivos"
-                        description="Sube PDF, imágenes, videos, flujogramas, documentos u otros recursos."
+                        description="Sube archivos PDF, imágenes o videos para visualización protegida."
                     />
                 ) : (
                     <section className="overflow-hidden rounded-2xl border border-[#e5eaf2] bg-white shadow-sm dark:border-[#2e3a50] dark:bg-[#1c2536]">

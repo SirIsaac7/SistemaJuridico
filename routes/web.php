@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserStatusController;
 use App\Http\Controllers\Libros\ArchivoConcedidoContenidoController;
+use App\Http\Controllers\Libros\ArchivoConcedidoVisorController;
 use App\Http\Controllers\Libros\ArchivoContenidoController;
 use App\Http\Controllers\Libros\ArchivoController;
 use App\Http\Controllers\Libros\ArchivoStatusController;
@@ -58,6 +59,10 @@ Route::middleware(['auth'])->group(function () {
             ->name('mis-materias.show');
 
         Route::scopeBindings()->group(function () {
+            Route::get(
+                'mis-materias/{materia}/archivos/{archivo}/visor',
+                ArchivoConcedidoVisorController::class,
+            )->name('mis-materias.archivos.visor');
             Route::get(
                 'mis-materias/{materia}/archivos/{archivo}/contenido',
                 ArchivoConcedidoContenidoController::class,

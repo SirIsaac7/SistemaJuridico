@@ -33,6 +33,17 @@ class Archivo extends Model
         self::TIPO_OTRO,
     ];
 
+    public const TIPOS_VISUALIZABLES = [
+        self::TIPO_PDF,
+        self::TIPO_IMAGEN,
+        self::TIPO_VIDEO,
+    ];
+
+    public function esVisualizablePorEstudiante(): bool
+    {
+        return in_array($this->tipo, self::TIPOS_VISUALIZABLES, true);
+    }
+
     /**
      * @var array<string, mixed>
      */

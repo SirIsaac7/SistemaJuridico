@@ -40,7 +40,7 @@ class ArchivoController extends Controller
     ): RedirectResponse {
         $service->update(
             $archivo,
-            $request->safe()->only(['titulo', 'descripcion', 'tipo']),
+            $request->safe()->only(['titulo', 'descripcion']),
         );
 
         return back()->with('success', 'La información del archivo fue actualizada.');

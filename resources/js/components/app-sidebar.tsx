@@ -46,30 +46,6 @@ const navSections: SidebarNavSection[] = [
                     { title: 'Solicitudes recibidas', href: '/libros/solicitudes-recibidas', permission: 'libros.solicitudes.ver-recibidas' },
                 ],
             },
-            {
-                title: 'Expedientes',
-                icon: 'solar:server-linear',
-                children: [{ title: 'Todos' }, { title: 'Activos' }, { title: 'Archivados' }],
-            },
-            { title: 'Clientes', icon: 'solar:user-circle-linear' },
-            { title: 'Audiencias', icon: 'solar:calendar-linear' },
-            { title: 'Calendario', icon: 'solar:calendar-date-linear' },
-        ],
-    },
-    {
-        title: 'Documentación',
-        items: [
-            { title: 'Documentos', icon: 'solar:documents-linear' },
-            { title: 'Normativa', icon: 'solar:notes-linear' },
-            { title: 'Notificaciones', icon: 'solar:bell-linear' },
-        ],
-    },
-    {
-        title: 'Herramientas',
-        items: [
-            { title: 'Buscador normativo', icon: 'solar:magnifer-linear' },
-            { title: 'Generador de escritos', icon: 'solar:document-add-linear' },
-            { title: 'Analítica jurídica', icon: 'solar:pie-chart-2-linear' },
         ],
     },
 ];
