@@ -102,4 +102,14 @@ class User extends Authenticatable
             ->where('estado', DispositivoUsuario::ESTADO_ACTIVO)
             ->latestOfMany('fecha_vinculacion');
     }
+
+    public function solicitudesReseteoDispositivo(): HasMany
+    {
+        return $this->hasMany(SolicitudReseteoDispositivo::class, 'usuario_id');
+    }
+
+    public function solicitudesReseteoRespondidas(): HasMany
+    {
+        return $this->hasMany(SolicitudReseteoDispositivo::class, 'respondido_por');
+    }
 }

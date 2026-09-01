@@ -20,9 +20,15 @@ const navSections: SidebarNavSection[] = [
         items: [
             {
                 title: 'Usuarios',
-                href: '/users',
                 icon: 'solar:users-group-rounded-linear',
-                permission: 'usuarios.ver',
+                children: [
+                    { title: 'Listado de usuarios', href: '/users', permission: 'usuarios.ver' },
+                    {
+                        title: 'Reseteos de dispositivo',
+                        href: '/users/device-reset-requests',
+                        permission: 'usuarios.resetear-dispositivo',
+                    },
+                ],
             },
             {
                 title: 'Roles y permisos',

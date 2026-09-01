@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\ApprovedDeviceResetRequestController;
 use App\Http\Controllers\Admin\DeletedUserController;
+use App\Http\Controllers\Admin\DeviceResetRequestController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserController;
@@ -36,6 +38,13 @@ Route::middleware(['auth'])->group(function () {
     Route::put('roles/{role}/permissions', [RolePermissionController::class, 'update'])
         ->name('roles.permissions.update');
     Route::resource('roles', RoleController::class)->only(['index', 'store', 'update', 'destroy']);
+
+    Route::get('users/device-reset-requests', [DeviceResetRequestController::class, 'index'])
+        ->name('users.device-reset-requests.index');
+    Route::post(
+        'users/device-reset-requests/{solicitudReseteoDispositivo}/approval',
+        [ApprovedDeviceResetRequestController::class, 'store'],
+    )->name('users.device-reset-requests.approval.store');
 
     Route::put('users/{user}/status', UserStatusController::class)->name('users.status.update');
     Route::put('users/{user}/device/reset', UserDeviceResetController::class)->name('users.device.reset');

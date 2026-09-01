@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { UserFormDialog } from '@/features/users/components/user-form-dialog';
+import { UserSectionTabs } from '@/features/users/components/user-section-tabs';
 import { type ManagedUser, type UserRoleOption } from '@/features/users/types';
 import AppLayout from '@/layouts/app-layout';
 import { confirmAction } from '@/lib/sweet-alert';
@@ -248,6 +249,8 @@ export default function UsersIndex({ users, roles, filters, counts }: UsersIndex
                         </Button>
                     </Can>
                 </section>
+
+                <UserSectionTabs active="users" />
 
                 <section className="min-w-0 overflow-hidden rounded-2xl border border-[#e5eaf2] bg-white shadow-sm dark:border-[#2e3a50] dark:bg-[#1c2536]">
                     <div className="flex flex-col gap-5 border-b border-[#e5eaf2] px-5 py-5 sm:px-7 dark:border-[#2e3a50]">

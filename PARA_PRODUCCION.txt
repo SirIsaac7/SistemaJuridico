@@ -1,0 +1,43 @@
+CONFIGURACION PARA PRODUCCION
+============================
+
+Cuando Sistema Juridico se publique en un dominio con HTTPS, revisar el archivo .env de produccion.
+
+Configuracion recomendada:
+
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://tu-dominio.com
+
+SESSION_DRIVER=database
+SESSION_SECURE_COOKIE=true
+
+ACTIVE_DEVICE_LIMIT=1
+DEVICE_COOKIE_NAME=device_token
+DEVICE_COOKIE_LIFETIME=2628000
+DEVICE_COOKIE_SECURE=true
+
+IMPORTANTE
+----------
+
+1. DEVICE_COOKIE_SECURE=true y SESSION_SECURE_COOKIE=true requieren que toda la aplicacion funcione mediante HTTPS.
+2. No activar estas opciones mientras se pruebe mediante http://localhost, porque el navegador no enviara cookies marcadas como seguras por HTTP.
+3. No copiar APP_KEY desde desarrollo ni ejecutar key:generate sobre una aplicacion que ya tenga datos cifrados. La produccion debe conservar siempre su propia APP_KEY.
+4. No guardar contrasenas, claves, tokens ni otros secretos dentro de este archivo.
+
+Comandos habituales durante el despliegue:
+
+php artisan migrate --force
+php artisan db:seed --class=RolePermissionSeeder --force
+npm ci
+npm run build
+php artisan optimize
+
+Comprobaciones:
+
+- El dominio abre exclusivamente con HTTPS.
+- SESSION_DRIVER permanece configurado como database.
+- La tabla sessions existe.
+- Las migraciones de dispositivos y solicitudes de reseteo fueron ejecutadas.
+- El permiso usuarios.resetear-dispositivo existe.
+- El superadministrador puede acceder a Usuarios > Reseteos de dispositivo.

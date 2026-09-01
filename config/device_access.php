@@ -11,4 +11,9 @@ return [
     ],
 
     'last_access_touch_interval_seconds' => 300,
+
+    'reset_requests' => [
+        'challenge_lifetime_minutes' => 10,
+        'cooldown_days' => 7,
+    ],
 ];

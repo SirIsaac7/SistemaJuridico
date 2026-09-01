@@ -6,12 +6,14 @@ use App\Models\AccesoMateria;
 use App\Models\Archivo;
 use App\Models\Materia;
 use App\Models\SolicitudAcceso;
+use App\Models\SolicitudReseteoDispositivo;
 use App\Models\User;
 use App\Policies\AccesoMateriaPolicy;
 use App\Policies\ArchivoPolicy;
 use App\Policies\MateriaPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\SolicitudAccesoPolicy;
+use App\Policies\SolicitudReseteoDispositivoPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -38,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Materia::class, MateriaPolicy::class);
         Gate::policy(Archivo::class, ArchivoPolicy::class);
         Gate::policy(SolicitudAcceso::class, SolicitudAccesoPolicy::class);
+        Gate::policy(SolicitudReseteoDispositivo::class, SolicitudReseteoDispositivoPolicy::class);
 
         Gate::before(function (User $user): ?bool {
             return $user->hasRole(config('access_control.super_admin_role')) ? true : null;

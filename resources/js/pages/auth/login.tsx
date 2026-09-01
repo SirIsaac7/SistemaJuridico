@@ -21,12 +21,14 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
-    const { data, setData, post, processing, errors, reset } = useForm<LoginForm>({
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm<LoginForm>({
         email: '',
         password: '',
         remember: false,
     });
     const deviceError = (errors as Record<string, string | undefined>).device;
+    const deviceCode = (errors as Record<string, string | undefined>).device_code;
+    const resetRequest = useForm<Record<string, never>>({});
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -46,11 +48,30 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             )}
 
             {deviceError && (
-                <div
-                    role="alert"
-                    className="mb-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
-                >
-                    {deviceError}
+                <div className="mb-5 flex flex-col gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 dark:border-red-500/30 dark:bg-red-500/10">
+                    <p role="alert" className="text-sm font-medium text-red-700 dark:text-red-300">
+                        {deviceError}
+                    </p>
+                    {deviceCode === 'DEVICE_NOT_AUTHORIZED' && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() =>
+                                resetRequest.post(route('device-reset-requests.store'), {
+                                    preserveScroll: true,
+                                    onSuccess: () => clearErrors(),
+                                })
+                            }
+                            disabled={resetRequest.processing}
+                            className="border-red-300 bg-white text-red-700 hover:bg-red-100 hover:text-red-800 dark:border-red-500/40 dark:bg-transparent dark:text-red-200 dark:hover:bg-red-500/10"
+                        >
+                            {resetRequest.processing && <LoaderCircle className="size-4 animate-spin" />}
+                            Solicitar reseteo de dispositivo
+                        </Button>
+                    )}
+                    {resetRequest.errors.device_request && (
+                        <p className="text-sm text-red-700 dark:text-red-300">{resetRequest.errors.device_request}</p>
+                    )}
                 </div>
             )}
 

@@ -6,6 +6,7 @@ use App\Exceptions\DeviceAccessException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Services\Auth\DeviceAccessService;
+use App\Services\Auth\DeviceResetRequestService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,11 +32,15 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request, DeviceAccessService $deviceAccess): RedirectResponse
-    {
+    public function store(
+        LoginRequest $request,
+        DeviceAccessService $deviceAccess,
+        DeviceResetRequestService $resetRequests,
+    ): RedirectResponse {
         $request->authenticate();
 
         $request->session()->regenerate();
+        $authenticatedUser = $request->user();
 
         try {
             $deviceAccess->establishLogin($request, $request->user());
@@ -43,6 +48,12 @@ class AuthenticatedSessionController extends Controller
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+
+            if ($exception instanceof DeviceAccessException
+                && $exception->errorCode === DeviceAccessException::DEVICE_NOT_AUTHORIZED
+                && $authenticatedUser) {
+                $resetRequests->stageChallenge($request, $authenticatedUser);
+            }
 
             if (! $exception instanceof DeviceAccessException) {
                 throw $exception;

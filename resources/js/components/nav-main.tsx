@@ -126,7 +126,8 @@ export function NavMain({ sections }: { sections: SidebarNavSection[] }) {
                 .map((item) => ({
                     ...item,
                     children: item.children?.filter((child) => !child.permission || permissions.has(child.permission)),
-                })),
+                }))
+                .filter((item) => item.href || !item.children || item.children.length > 0),
         }))
         .filter((section) => section.items.length > 0);
 
