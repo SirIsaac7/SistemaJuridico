@@ -32,7 +32,10 @@ class UserController extends Controller
 
         $users = $query
             ->select(['id', 'name', 'email', 'is_active', 'created_at', 'deleted_at'])
-            ->with('roles:id,name')
+            ->with([
+                'roles:id,name',
+                'dispositivoActivo',
+            ])
             ->when($status === 'active', fn ($query) => $query->where('is_active', true))
             ->when($status === 'blocked', fn ($query) => $query->where('is_active', false))
             ->when($search !== '', function ($query) use ($search): void {
@@ -162,6 +165,7 @@ class UserController extends Controller
         $isDeleted = $user->trashed();
         $isCurrentUser = $authenticatedUser->is($user);
         $isOnlySuperAdministrator = $onlySuperAdministratorId === $user->id;
+        $device = $user->dispositivoActivo;
 
         return [
             'id' => $user->id,
@@ -176,12 +180,21 @@ class UserController extends Controller
             'deleted_at' => DateTimeFormatter::forDisplay($user->deleted_at),
             'role' => $role ? ['id' => $role->id, 'name' => $role->name] : null,
             'is_current_user' => $isCurrentUser,
+            'device' => $device ? [
+                'tipo_dispositivo' => $device->tipo_dispositivo,
+                'sistema_operativo' => $device->sistema_operativo,
+                'navegador' => $device->navegador,
+                'estado' => $device->estado,
+                'fecha_vinculacion' => DateTimeFormatter::forDisplay($device->fecha_vinculacion),
+                'ultimo_acceso' => DateTimeFormatter::forDisplay($device->ultimo_acceso),
+            ] : null,
             'can' => [
                 'update' => ! $isDeleted && Gate::allows('update', $user),
                 'delete' => ! $isDeleted && ! $isCurrentUser && ! $isOnlySuperAdministrator && Gate::allows('delete', $user),
                 'update_status' => ! $isDeleted && ! $isCurrentUser && ! $isOnlySuperAdministrator && Gate::allows('updateStatus', $user),
                 'assign_role' => ! $isDeleted && ! $isCurrentUser && ! $isOnlySuperAdministrator && Gate::allows('assignRole', $user),
                 'restore' => $isDeleted && Gate::allows('restore', $user),
+                'reset_device' => ! $isDeleted && ! $isCurrentUser && $device !== null && Gate::allows('resetDevice', $user),
             ],
         ];
     }

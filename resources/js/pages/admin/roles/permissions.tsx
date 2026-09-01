@@ -77,7 +77,7 @@ export default function RolePermissions({ role, permissionGroups }: RolePermissi
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Permisos de ${readableRoleName(role.name)}`} />
 
-            <main className="flex flex-1 flex-col gap-6 bg-[#f6f9fc] p-4 sm:p-6 lg:p-8 dark:bg-[#152033]">
+            <main className="flex min-w-0 flex-1 flex-col gap-6 bg-[#f6f9fc] p-4 sm:p-6 lg:p-8 dark:bg-[#152033]">
                 <section className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
                     <div className="flex flex-col gap-3">
                         <Button asChild variant="ghost" className="w-fit px-0 text-[#5d87ff] hover:bg-transparent hover:text-[#4d76e8]">
@@ -105,7 +105,7 @@ export default function RolePermissions({ role, permissionGroups }: RolePermissi
                     </div>
                 </section>
 
-                <form onSubmit={submit} className="flex flex-col gap-5">
+                <form onSubmit={submit} className="flex min-w-0 flex-col gap-5">
                     <section className="flex flex-col justify-between gap-4 rounded-2xl border border-[#e5eaf2] bg-white px-5 py-5 shadow-sm sm:flex-row sm:items-center sm:px-7 dark:border-[#2e3a50] dark:bg-[#1c2536]">
                         <div className="flex items-center gap-3">
                             <Checkbox id="select-all" checked={allSelected} onCheckedChange={(checked) => toggleAll(checked === true)} />
@@ -118,7 +118,7 @@ export default function RolePermissions({ role, permissionGroups }: RolePermissi
                         <CheckCheck className="hidden size-6 text-[#13deb9] sm:block" />
                     </section>
 
-                    <div className="grid gap-5 xl:grid-cols-2">
+                    <div className="grid min-w-0 gap-5 xl:grid-cols-2">
                         {permissionGroups.map((group) => {
                             const groupNames = group.permissions.map((permission) => permission.name);
                             const groupSelected = groupNames.length > 0 && groupNames.every((permission) => data.permissions.includes(permission));
@@ -126,7 +126,7 @@ export default function RolePermissions({ role, permissionGroups }: RolePermissi
                             return (
                                 <section
                                     key={group.key}
-                                    className="overflow-hidden rounded-2xl border border-[#e5eaf2] bg-white shadow-sm dark:border-[#2e3a50] dark:bg-[#1c2536]"
+                                    className="min-w-0 overflow-hidden rounded-2xl border border-[#e5eaf2] bg-white shadow-sm dark:border-[#2e3a50] dark:bg-[#1c2536]"
                                 >
                                     <div className="flex items-start justify-between gap-4 border-b border-[#e5eaf2] bg-[#f7f9fc] px-6 py-5 dark:border-[#2e3a50] dark:bg-[#253047]">
                                         <div className="flex gap-3">
@@ -163,11 +163,11 @@ export default function RolePermissions({ role, permissionGroups }: RolePermissi
                                                         onCheckedChange={(value) => togglePermission(permission.name, value === true)}
                                                         className="mt-0.5"
                                                     />
-                                                    <span className="flex flex-col gap-1">
+                                                    <span className="flex min-w-0 flex-col gap-1">
                                                         <span className="text-sm font-semibold text-[#2a3547] dark:text-white">
                                                             {permission.label}
                                                         </span>
-                                                        <span className="font-mono text-xs text-[#7c8fac]">{permission.name}</span>
+                                                        <span className="font-mono text-xs break-all text-[#7c8fac]">{permission.name}</span>
                                                     </span>
                                                 </label>
                                             );

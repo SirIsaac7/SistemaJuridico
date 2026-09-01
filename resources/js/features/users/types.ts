@@ -18,11 +18,20 @@ export interface ManagedUser {
     deleted_at: string | null;
     role: UserRole | null;
     is_current_user: boolean;
+    device: {
+        tipo_dispositivo: string;
+        sistema_operativo: string;
+        navegador: string;
+        estado: string;
+        fecha_vinculacion: string | null;
+        ultimo_acceso: string | null;
+    } | null;
     can: {
         update: boolean;
         delete: boolean;
         update_status: boolean;
         assign_role: boolean;
         restore: boolean;
+        reset_device: boolean;
     };
 }

@@ -45,4 +45,9 @@ class UserPolicy
     {
         return $user->isNot($targetUser) && $user->can('usuarios.asignar-roles');
     }
+
+    public function resetDevice(User $user, User $targetUser): bool
+    {
+        return $user->isNot($targetUser) && $user->can('usuarios.resetear-dispositivo');
+    }
 }

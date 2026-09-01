@@ -49,6 +49,7 @@ class UserPolicyTest extends TestCase
             'restore' => ['restore', 'usuarios.restaurar', true],
             'update status' => ['updateStatus', 'usuarios.bloquear', true],
             'assign role' => ['assignRole', 'usuarios.asignar-roles', true],
+            'reset device' => ['resetDevice', 'usuarios.resetear-dispositivo', true],
         ];
     }
 
@@ -61,6 +62,7 @@ class UserPolicyTest extends TestCase
             'delete' => ['delete', 'usuarios.eliminar'],
             'update status' => ['updateStatus', 'usuarios.bloquear'],
             'assign role' => ['assignRole', 'usuarios.asignar-roles'],
+            'reset device' => ['resetDevice', 'usuarios.resetear-dispositivo'],
         ];
     }
 }

@@ -82,7 +82,7 @@ export default function RolesIndex({ roles }: RolesIndexProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Roles y permisos" />
 
-            <main className="flex flex-1 flex-col gap-6 bg-[#f6f9fc] p-4 sm:p-6 lg:p-8 dark:bg-[#152033]">
+            <main className="flex min-w-0 flex-1 flex-col gap-6 bg-[#f6f9fc] p-4 sm:p-6 lg:p-8 dark:bg-[#152033]">
                 <section className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2 text-sm font-medium text-[#5d87ff]">
@@ -101,7 +101,7 @@ export default function RolesIndex({ roles }: RolesIndexProps) {
                     </Can>
                 </section>
 
-                <section className="overflow-hidden rounded-2xl border border-[#e5eaf2] bg-white shadow-sm dark:border-[#2e3a50] dark:bg-[#1c2536]">
+                <section className="min-w-0 overflow-hidden rounded-2xl border border-[#e5eaf2] bg-white shadow-sm dark:border-[#2e3a50] dark:bg-[#1c2536]">
                     <div className="flex flex-col justify-between gap-4 border-b border-[#e5eaf2] px-5 py-5 sm:flex-row sm:items-center sm:px-7 dark:border-[#2e3a50]">
                         <div>
                             <h2 className="text-lg font-semibold text-[#2a3547] dark:text-white">Listado de roles</h2>
@@ -118,7 +118,7 @@ export default function RolesIndex({ roles }: RolesIndexProps) {
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    <div className="w-full max-w-full overflow-x-auto overscroll-x-contain">
                         <table className="w-full min-w-[820px] text-left">
                             <thead className="bg-[#f7f9fc] text-xs font-semibold tracking-wide text-[#5a6a85] uppercase dark:bg-[#253047] dark:text-[#aab7ca]">
                                 <tr>

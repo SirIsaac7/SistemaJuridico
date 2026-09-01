@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Support\DateTimeFormatter;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,9 +19,19 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $device = $request->user()->dispositivoActivo()->first();
+
         return Inertia::render('settings/profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'device' => $device ? [
+                'tipo_dispositivo' => $device->tipo_dispositivo,
+                'sistema_operativo' => $device->sistema_operativo,
+                'navegador' => $device->navegador,
+                'estado' => $device->estado,
+                'fecha_vinculacion' => DateTimeFormatter::forDisplay($device->fecha_vinculacion),
+                'ultimo_acceso' => DateTimeFormatter::forDisplay($device->ultimo_acceso),
+            ] : null,
         ]);
     }
 

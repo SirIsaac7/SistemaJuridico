@@ -16,8 +16,10 @@ import {
     ChevronLeft,
     ChevronRight,
     LoaderCircle,
+    MonitorSmartphone,
     Pencil,
     Plus,
+    RotateCcw,
     Search,
     Trash2,
     UserRoundCheck,
@@ -57,7 +59,7 @@ interface UsersIndexProps {
     counts: UserCounts;
 }
 
-type UserAction = 'delete' | 'block' | 'activate' | 'restore';
+type UserAction = 'delete' | 'block' | 'activate' | 'restore' | 'reset_device';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -180,6 +182,13 @@ export default function UsersIndex({ users, roles, filters, counts }: UsersIndex
                 icon: 'question' as const,
                 tone: 'primary' as const,
             },
+            reset_device: {
+                title: 'Resetear dispositivo',
+                text: `Se desvinculará el navegador autorizado de ${user.name} y se cerrarán todas sus sesiones activas. El historial no será eliminado.`,
+                confirmText: 'Resetear dispositivo',
+                icon: 'warning' as const,
+                tone: 'danger' as const,
+            },
         }[type];
 
         if (!(await confirmAction(confirmation))) {
@@ -202,6 +211,11 @@ export default function UsersIndex({ users, roles, filters, counts }: UsersIndex
             return;
         }
 
+        if (type === 'reset_device') {
+            router.put(`/users/${user.id}/device/reset`, {}, finish);
+            return;
+        }
+
         router.put(`/users/${user.id}/status`, { is_active: type === 'activate' }, finish);
     }
 
@@ -216,7 +230,7 @@ export default function UsersIndex({ users, roles, filters, counts }: UsersIndex
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Usuarios" />
 
-            <main className="flex flex-1 flex-col gap-6 bg-[#f6f9fc] p-4 sm:p-6 lg:p-8 dark:bg-[#152033]">
+            <main className="flex min-w-0 flex-1 flex-col gap-6 bg-[#f6f9fc] p-4 sm:p-6 lg:p-8 dark:bg-[#152033]">
                 <section className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2 text-sm font-medium text-[#5d87ff]">
@@ -235,7 +249,7 @@ export default function UsersIndex({ users, roles, filters, counts }: UsersIndex
                     </Can>
                 </section>
 
-                <section className="overflow-hidden rounded-2xl border border-[#e5eaf2] bg-white shadow-sm dark:border-[#2e3a50] dark:bg-[#1c2536]">
+                <section className="min-w-0 overflow-hidden rounded-2xl border border-[#e5eaf2] bg-white shadow-sm dark:border-[#2e3a50] dark:bg-[#1c2536]">
                     <div className="flex flex-col gap-5 border-b border-[#e5eaf2] px-5 py-5 sm:px-7 dark:border-[#2e3a50]">
                         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                             <div>
@@ -320,20 +334,22 @@ export default function UsersIndex({ users, roles, filters, counts }: UsersIndex
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full min-w-[1080px] text-left">
+                    <div className="w-full max-w-full overflow-x-auto overscroll-x-contain">
+                        <table className="w-full min-w-[1320px] text-left">
                             <thead className="bg-[#f7f9fc] text-xs font-semibold tracking-wide text-[#5a6a85] uppercase dark:bg-[#253047] dark:text-[#aab7ca]">
                                 <tr>
                                     <th className="px-7 py-4">Usuario</th>
                                     <th className="px-5 py-4">Rol</th>
                                     <th className="px-5 py-4">Estado</th>
+                                    <th className="px-5 py-4">Dispositivo autorizado</th>
                                     <th className="px-5 py-4">{filters.status === 'deleted' ? 'Eliminado el' : 'Fecha y hora'}</th>
                                     <th className="px-7 py-4 text-right">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#e5eaf2] dark:divide-[#2e3a50]">
                                 {users.data.map((user) => {
-                                    const hasActions = user.can.update || user.can.update_status || user.can.delete || user.can.restore;
+                                    const hasActions =
+                                        user.can.update || user.can.update_status || user.can.delete || user.can.restore || user.can.reset_device;
 
                                     return (
                                         <tr key={user.id} className="transition-colors hover:bg-[#f8faff] dark:hover:bg-[#253047]/70">
@@ -377,6 +393,28 @@ export default function UsersIndex({ users, roles, filters, counts }: UsersIndex
                                                     <span className="inline-flex items-center gap-2 text-sm font-medium text-amber-700">
                                                         <span className="size-2 rounded-full bg-amber-500" /> Bloqueado
                                                     </span>
+                                                )}
+                                            </td>
+                                            <td className="px-5 py-4">
+                                                {user.device ? (
+                                                    <div className="flex min-w-56 items-start gap-2.5 text-sm">
+                                                        <MonitorSmartphone className="mt-0.5 size-4 shrink-0 text-[#5d87ff]" />
+                                                        <div className="grid gap-0.5">
+                                                            <span className="font-semibold text-[#2a3547] dark:text-white">
+                                                                {user.device.tipo_dispositivo} · {user.device.navegador}
+                                                            </span>
+                                                            <span className="text-xs text-[#7c8fac]">{user.device.sistema_operativo}</span>
+                                                            <span className="text-xs font-medium text-emerald-600">Estado: Activo</span>
+                                                            <span className="text-xs text-[#7c8fac]">
+                                                                Vinculado: {user.device.fecha_vinculacion ?? '—'}
+                                                            </span>
+                                                            <span className="text-xs text-[#7c8fac]">
+                                                                Último acceso: {user.device.ultimo_acceso ?? '—'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-sm text-[#7c8fac]">Sin dispositivo activo</span>
                                                 )}
                                             </td>
                                             <td className="px-5 py-4 text-sm text-[#5a6a85] dark:text-[#aab7ca]">
@@ -437,6 +475,17 @@ export default function UsersIndex({ users, roles, filters, counts }: UsersIndex
                                                                     className="text-[#5d87ff] hover:bg-[#5d87ff]/10 hover:text-[#4d76e8]"
                                                                 >
                                                                     <ArchiveRestore className="size-4" /> Restaurar
+                                                                </Button>
+                                                            )}
+                                                            {user.can.reset_device && (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => void executeAction('reset_device', user)}
+                                                                    disabled={processingUserId === user.id}
+                                                                    className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30"
+                                                                >
+                                                                    <RotateCcw className="size-4" /> Resetear dispositivo
                                                                 </Button>
                                                             )}
                                                         </>

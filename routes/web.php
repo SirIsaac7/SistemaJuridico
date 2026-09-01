@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DeletedUserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserDeviceResetController;
 use App\Http\Controllers\Admin\UserStatusController;
 use App\Http\Controllers\Libros\ArchivoConcedidoContenidoController;
 use App\Http\Controllers\Libros\ArchivoConcedidoVisorController;
@@ -37,6 +38,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class)->only(['index', 'store', 'update', 'destroy']);
 
     Route::put('users/{user}/status', UserStatusController::class)->name('users.status.update');
+    Route::put('users/{user}/device/reset', UserDeviceResetController::class)->name('users.device.reset');
     Route::put('deleted-users/{user}', [DeletedUserController::class, 'update'])->name('deleted-users.update');
     Route::resource('users', UserController::class)->only(['index', 'store', 'update', 'destroy']);
 

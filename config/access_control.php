@@ -28,6 +28,7 @@ return [
                 ['name' => 'usuarios.eliminar', 'label' => 'Enviar usuarios a la papelera'],
                 ['name' => 'usuarios.restaurar', 'label' => 'Restaurar usuarios'],
                 ['name' => 'usuarios.asignar-roles', 'label' => 'Asignar roles'],
+                ['name' => 'usuarios.resetear-dispositivo', 'label' => 'Resetear dispositivo autorizado'],
             ],
         ],
         'libros' => [

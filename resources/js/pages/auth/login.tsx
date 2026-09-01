@@ -26,6 +26,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         password: '',
         remember: false,
     });
+    const deviceError = (errors as Record<string, string | undefined>).device;
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -41,6 +42,15 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             {status && (
                 <div className="mb-5 rounded-md bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
                     {status}
+                </div>
+            )}
+
+            {deviceError && (
+                <div
+                    role="alert"
+                    className="mb-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
+                >
+                    {deviceError}
                 </div>
             )}
 
@@ -104,7 +114,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             className="border-[#c5cfdd] data-[state=checked]:border-[#5d87ff] data-[state=checked]:bg-[#5d87ff]"
                         />
                         <Label htmlFor="remember" className="cursor-pointer font-normal text-[#2a3547] dark:text-[#d5deeb]">
-                            Recordar este dispositivo
+                            Mantener sesión iniciada
                         </Label>
                     </div>
 

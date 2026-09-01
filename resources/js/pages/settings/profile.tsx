@@ -1,6 +1,7 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { MonitorSmartphone } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import DeleteUser from '@/components/delete-user';
@@ -19,7 +20,22 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
+interface AuthorizedDevice {
+    tipo_dispositivo: string;
+    sistema_operativo: string;
+    navegador: string;
+    estado: string;
+    fecha_vinculacion: string | null;
+    ultimo_acceso: string | null;
+}
+
+interface ProfileProps {
+    mustVerifyEmail: boolean;
+    status?: string;
+    device: AuthorizedDevice | null;
+}
+
+export default function Profile({ mustVerifyEmail, status, device }: ProfileProps) {
     const { auth } = usePage<SharedData>().props;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
@@ -111,6 +127,37 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             </Transition>
                         </div>
                     </form>
+                </div>
+
+                <div className="space-y-6">
+                    <HeadingSmall title="Dispositivo autorizado" description="Navegador vinculado actualmente a tu cuenta" />
+
+                    <div className="rounded-xl border border-[#e5eaf2] bg-white p-5 dark:border-[#2e3a50] dark:bg-[#1c2536]">
+                        {device ? (
+                            <div className="flex items-start gap-4">
+                                <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-[#5d87ff]/10 text-[#5d87ff]">
+                                    <MonitorSmartphone className="size-5" />
+                                </div>
+                                <dl className="grid flex-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+                                    {[
+                                        ['Tipo de dispositivo', device.tipo_dispositivo],
+                                        ['Sistema operativo', device.sistema_operativo],
+                                        ['Navegador', device.navegador],
+                                        ['Estado', device.estado === 'activo' ? 'Activo' : 'Inactivo'],
+                                        ['Fecha de vinculación', device.fecha_vinculacion ?? '—'],
+                                        ['Último acceso', device.ultimo_acceso ?? '—'],
+                                    ].map(([label, value]) => (
+                                        <div key={label}>
+                                            <dt className="text-xs font-semibold tracking-wide text-[#7c8fac] uppercase">{label}</dt>
+                                            <dd className="mt-1 text-sm font-medium text-[#2a3547] dark:text-white">{value}</dd>
+                                        </div>
+                                    ))}
+                                </dl>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-[#7c8fac]">Todavía no existe un dispositivo autorizado.</p>
+                        )}
+                    </div>
                 </div>
 
                 <DeleteUser />

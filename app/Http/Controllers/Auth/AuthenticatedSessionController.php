@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Exceptions\DeviceAccessException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\Auth\DeviceAccessService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -27,11 +31,32 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request, DeviceAccessService $deviceAccess): RedirectResponse
     {
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        try {
+            $deviceAccess->establishLogin($request, $request->user());
+        } catch (Throwable $exception) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            if (! $exception instanceof DeviceAccessException) {
+                throw $exception;
+            }
+
+            if ($request->expectsJson() && ! $request->header('X-Inertia')) {
+                throw $exception;
+            }
+
+            throw ValidationException::withMessages([
+                'device' => $exception->getMessage(),
+                'device_code' => $exception->errorCode,
+            ]);
+        }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
@@ -39,8 +64,14 @@ class AuthenticatedSessionController extends Controller
     /**
      * Destroy an authenticated session.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, DeviceAccessService $deviceAccess): RedirectResponse
     {
+        $user = $request->user();
+
+        if ($user) {
+            $deviceAccess->touchCurrentDevice($request, $user);
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
