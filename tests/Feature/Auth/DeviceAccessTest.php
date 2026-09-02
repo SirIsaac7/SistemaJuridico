@@ -4,10 +4,12 @@ namespace Tests\Feature\Auth;
 
 use App\Models\DispositivoUsuario;
 use App\Models\User;
+use App\Notifications\DeviceResetCompleted;
 use App\Services\Auth\DeviceDescriptorService;
 use App\Services\Auth\DeviceTokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Mockery\MockInterface;
 use RuntimeException;
 use Spatie\Permission\Models\Permission;
@@ -112,6 +114,8 @@ class DeviceAccessTest extends TestCase
 
     public function test_authorized_administrator_can_reset_device_and_close_sessions(): void
     {
+        Notification::fake();
+
         $administrator = User::factory()->create();
         $administrator->givePermissionTo(Permission::findOrCreate('usuarios.resetear-dispositivo'));
         $user = User::factory()->create();
@@ -126,10 +130,31 @@ class DeviceAccessTest extends TestCase
         $response->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame(DispositivoUsuario::ESTADO_INACTIVO, $device->fresh()->estado);
         $this->assertSame(0, DB::table('sessions')->where('user_id', $user->id)->count());
+        Notification::assertSentTo($user, DeviceResetCompleted::class, function (DeviceResetCompleted $notification, array $channels) use ($user): bool {
+            $mail = $notification->toMail($user);
+            $html = view('mail.device-reset-completed', $mail->viewData)->render();
+            $text = view('mail.device-reset-completed-text', $mail->viewData)->render();
+
+            return $channels === ['mail']
+                && $notification->queue === 'mail'
+                && $notification->afterCommit === true
+                && $mail->subject === 'Tu dispositivo fue restablecido'
+                && $mail->view === [
+                    'html' => 'mail.device-reset-completed',
+                    'text' => 'mail.device-reset-completed-text',
+                ]
+                && str_contains($html, 'Sistema Jurídico')
+                && str_contains($html, 'Ya puedes iniciar sesión desde otro dispositivo y navegador.')
+                && str_contains($html, 'http://localhost/login')
+                && str_contains($text, 'Ya puedes iniciar sesión desde otro dispositivo y navegador.')
+                && ! str_contains($html, 'Regards,');
+        });
     }
 
     public function test_user_without_permission_cannot_reset_device(): void
     {
+        Notification::fake();
+
         $administrator = User::factory()->create();
         $user = User::factory()->create();
         $device = $this->createActiveDevice($user, self::TOKEN_A);
@@ -141,6 +166,7 @@ class DeviceAccessTest extends TestCase
             ->assertForbidden();
 
         $this->assertSame(DispositivoUsuario::ESTADO_ACTIVO, $device->fresh()->estado);
+        Notification::assertNothingSent();
     }
 
     public function test_login_after_reset_authorizes_new_browser_and_preserves_history(): void

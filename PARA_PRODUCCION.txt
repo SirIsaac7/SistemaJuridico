@@ -5,6 +5,7 @@ Cuando Sistema Juridico se publique en un dominio con HTTPS, revisar el archivo 
 
 Configuracion recomendada:
 
+APP_NAME="Sistema Juridico"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://tu-dominio.com
@@ -17,6 +18,22 @@ DEVICE_COOKIE_NAME=device_token
 DEVICE_COOKIE_LIFETIME=2628000
 DEVICE_COOKIE_SECURE=true
 
+CACHE_STORE=redis
+QUEUE_CONNECTION=redis
+REDIS_CLIENT=predis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=correo-remitente@gmail.com
+MAIL_PASSWORD="clave-de-aplicacion-de-google"
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=correo-remitente@gmail.com
+MAIL_FROM_NAME="Sistema Juridico"
+
 IMPORTANTE
 ----------
 
@@ -24,6 +41,9 @@ IMPORTANTE
 2. No activar estas opciones mientras se pruebe mediante http://localhost, porque el navegador no enviara cookies marcadas como seguras por HTTP.
 3. No copiar APP_KEY desde desarrollo ni ejecutar key:generate sobre una aplicacion que ya tenga datos cifrados. La produccion debe conservar siempre su propia APP_KEY.
 4. No guardar contrasenas, claves, tokens ni otros secretos dentro de este archivo.
+5. Si APP_NAME se cambia en una produccion que ya esta funcionando, el nombre de
+   la cookie de sesion y los prefijos de cache pueden cambiar; los usuarios podrian
+   tener que iniciar sesion nuevamente. Definirlo correctamente antes del estreno.
 
 Comandos habituales durante el despliegue:
 
@@ -41,3 +61,244 @@ Comprobaciones:
 - Las migraciones de dispositivos y solicitudes de reseteo fueron ejecutadas.
 - El permiso usuarios.resetear-dispositivo existe.
 - El superadministrador puede acceder a Usuarios > Reseteos de dispositivo.
+
+
+REDIS EN PRODUCCION
+-------------------
+
+El archivo compose.yaml crea Redis 7.4 con persistencia AOF, reinicio automatico,
+comprobacion de salud y un volumen llamado sistema-juridico-redis-data.
+
+Si Laravel se ejecuta directamente en el mismo servidor, usar:
+
+REDIS_HOST=127.0.0.1
+
+Comandos para instalar o actualizar Redis:
+
+docker compose pull redis
+docker compose up -d redis
+docker compose ps
+docker exec sistema-juridico-redis redis-cli PING
+
+La ultima orden debe responder PONG y el contenedor debe aparecer healthy.
+
+El compose actual publica 6379 solamente en 127.0.0.1. No cambiarlo a 0.0.0.0
+ni abrir el puerto 6379 a Internet. No ejecutar "docker compose down -v" en
+produccion, porque -v elimina el volumen persistente de Redis.
+
+Si Laravel tambien se ejecuta dentro de Docker, REDIS_HOST normalmente debe ser
+redis (el nombre del servicio) y ambos contenedores deben compartir una red. Dentro
+de un contenedor, 127.0.0.1 apunta al mismo contenedor y no al Redis externo.
+
+Si el hosting ofrece Redis administrado, no levantar el compose y utilizar las
+credenciales y opciones TLS entregadas por el proveedor.
+
+
+COLAS Y CORREOS
+---------------
+
+La notificacion de dispositivo usa la cola mail y se envia despues de que el
+reseteo fue confirmado en la base de datos. Redis no envia el correo por si solo:
+siempre debe existir un trabajador de Laravel ejecutandose.
+
+Comando del trabajador:
+
+php artisan queue:work redis --queue=mail,default --sleep=3 --tries=3 --backoff=60 --timeout=90 --max-time=3600
+
+No depender de una terminal abierta en produccion. Usar Supervisor, systemd o el
+administrador de procesos del hosting. Ejemplo de Supervisor para Linux; reemplazar
+la ruta y el usuario por los valores reales:
+
+[program:sistema-juridico-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=/usr/bin/php /var/www/SistemaJuridico/artisan queue:work redis --queue=mail,default --sleep=3 --tries=3 --backoff=60 --timeout=90 --max-time=3600
+directory=/var/www/SistemaJuridico
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/www/SistemaJuridico/storage/logs/queue-worker.log
+stopwaitsecs=100
+
+Despues de guardar la configuracion de Supervisor:
+
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start sistema-juridico-worker:*
+sudo supervisorctl status
+
+En cada despliegue ejecutar php artisan queue:restart para que Supervisor cargue
+el codigo nuevo.
+
+Diagnostico de trabajos fallidos:
+
+php artisan queue:failed
+php artisan queue:retry ID
+php artisan queue:retry all
+
+Antes de reintentar, corregir el problema indicado en storage/logs/laravel.log.
+
+
+GMAIL SMTP
+----------
+
+1. Activar la verificacion en dos pasos de la cuenta remitente.
+2. Crear una contrasena de aplicacion para SMTP; no usar la contrasena normal.
+3. Guardar esa contrasena solamente en el .env del servidor.
+4. MAIL_FROM_ADDRESS debe ser una direccion autorizada por la cuenta remitente.
+5. Revisar la bandeja de spam durante la primera prueba.
+
+No copiar a produccion la clave usada en desarrollo si se desea separar ambientes.
+Nunca subir .env a Git ni escribir la clave real en este documento.
+
+Gmail tiene limites de envio y no esta pensado para correo masivo. Si el volumen
+crece, cambiar a un proveedor de correo transaccional. La logica usa Laravel Mail,
+por lo que el proveedor puede cambiarse sin modificar el reseteo de dispositivos.
+
+Las plantillas personalizadas estan en:
+
+resources/views/mail/device-reset-completed.blade.php
+resources/views/mail/device-reset-completed-text.blade.php
+
+APP_URL debe cambiar de http://localhost a https://tu-dominio.com para que el boton
+del correo abra el dominio correcto.
+
+
+LARAVEL FORTIFY
+---------------
+
+Fortify ya esta incluido en composer.json. Su proveedor y configuracion estan en:
+
+bootstrap/providers.php
+app/Providers/FortifyServiceProvider.php
+config/fortify.php
+
+Actualmente estan habilitados el registro y el restablecimiento de contrasena. El
+login fue adaptado para conservar el control de dispositivo y la sesion unica.
+
+Las migraciones de columnas de doble factor y passkeys deben ejecutarse, aunque
+esas funciones todavia no estan habilitadas. No habilitar doble factor o passkeys
+solamente cambiando config/fortify.php: primero deben adaptarse y probarse con la
+logica de dispositivos.
+
+Comprobaciones de rutas:
+
+php artisan route:list --name=login
+php artisan route:list --name=password
+php artisan route:list --name=register
+
+
+ORDEN COMPLETO DE DESPLIEGUE
+----------------------------
+
+1. Respaldar base de datos y archivos almacenados por los usuarios.
+2. Confirmar que el .env de produccion existe y no sera reemplazado.
+3. En una instalacion nueva, generar APP_KEY una sola vez. Nunca regenerarla en
+   una produccion que ya tenga datos cifrados:
+
+   php artisan key:generate
+
+4. Activar mantenimiento si corresponde:
+
+   php artisan down
+
+5. Actualizar el codigo e instalar dependencias PHP:
+
+   composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+6. Compilar el frontend:
+
+   npm ci
+   npm run build
+
+7. Levantar y comprobar Redis:
+
+   docker compose up -d redis
+   docker compose ps
+
+8. Ejecutar migraciones y actualizar permisos:
+
+   php artisan migrate --force
+   php artisan db:seed --class=RolePermissionSeeder --force
+
+9. En la primera instalacion, crear el enlace de almacenamiento:
+
+   php artisan storage:link
+
+10. Actualizar las caches de Laravel:
+
+    php artisan optimize:clear
+    php artisan optimize
+
+11. Reiniciar el trabajador de colas:
+
+    php artisan queue:restart
+
+12. Desactivar mantenimiento:
+
+    php artisan up
+
+Si un paso falla, detener el despliegue, revisar el error y aplicar el procedimiento
+de restauracion del servidor antes de continuar.
+
+
+PERMISOS EN LINUX
+-----------------
+
+El usuario del servidor web debe poder escribir en storage y bootstrap/cache.
+Ajustar usuario y ruta antes de ejecutar:
+
+sudo chown -R www-data:www-data /var/www/SistemaJuridico/storage /var/www/SistemaJuridico/bootstrap/cache
+sudo chmod -R ug+rwX /var/www/SistemaJuridico/storage /var/www/SistemaJuridico/bootstrap/cache
+
+No otorgar permisos 777 a todo el proyecto.
+
+
+COMPROBACIONES FINALES
+----------------------
+
+- APP_ENV=production, APP_DEBUG=false y APP_URL usa el dominio HTTPS real.
+- El dominio redirige HTTP a HTTPS.
+- SESSION_DRIVER sigue siendo database; no cambiarlo a redis porque el control de
+  sesion unica y dispositivos consulta directamente la tabla sessions.
+- CACHE_STORE y QUEUE_CONNECTION usan redis.
+- Redis aparece healthy y PING responde PONG.
+- El trabajador aparece RUNNING en Supervisor.
+- Las tablas sessions, failed_jobs, dispositivos_usuario,
+  solicitudes_reseteo_dispositivo y las migraciones de Fortify existen.
+- El permiso usuarios.resetear-dispositivo existe.
+- Un administrador puede resetear un usuario diferente y cerrar sus sesiones.
+- El usuario recibe el correo con el enlace HTTPS correcto.
+- El usuario puede vincularse desde otro dispositivo y navegador.
+- storage/logs/laravel.log no tiene errores nuevos.
+- php artisan queue:failed no muestra trabajos sin revisar.
+
+Comandos para revisar valores no secretos:
+
+php artisan config:show app.env
+php artisan config:show app.debug
+php artisan config:show app.url
+php artisan config:show session.driver
+php artisan config:show cache.default
+php artisan config:show queue.default
+
+Despues de cambiar cualquier valor de .env ejecutar:
+
+php artisan optimize:clear
+php artisan optimize
+php artisan queue:restart
+
+
+SEGURIDAD Y RESPALDOS
+---------------------
+
+- Mantener APP_DEBUG=false y .env fuera de Git.
+- No guardar APP_KEY, credenciales SMTP, base de datos o Redis en el repositorio.
+- Respaldar base de datos, storage y el volumen de Redis antes de actualizaciones.
+- Probar cambios primero en staging cuando sea posible.
+- Ejecutar composer audit y npm audit durante mantenimiento, evaluando cada
+  actualizacion antes de instalarla.
+- Revisar periodicamente storage/logs/laravel.log y php artisan queue:failed.

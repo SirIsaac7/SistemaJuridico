@@ -5,6 +5,7 @@ namespace App\Services\Auth;
 use App\Exceptions\DeviceAccessException;
 use App\Models\DispositivoUsuario;
 use App\Models\User;
+use App\Notifications\DeviceResetCompleted;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -101,6 +102,8 @@ class DeviceAccessService
                 ->where('user_id', $user->getKey())
                 ->delete();
         }, 3);
+
+        $user->notify(new DeviceResetCompleted);
     }
 
     private function authorizeOrBindDevice(Request $request, User $user): DispositivoUsuario

@@ -5,9 +5,11 @@ namespace Tests\Feature\Auth;
 use App\Models\DispositivoUsuario;
 use App\Models\SolicitudReseteoDispositivo;
 use App\Models\User;
+use App\Notifications\DeviceResetCompleted;
 use App\Services\Auth\DeviceTokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Testing\TestResponse;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -105,6 +107,8 @@ class DeviceResetRequestTest extends TestCase
 
     public function test_authorized_administrator_can_view_and_approve_request(): void
     {
+        Notification::fake();
+
         $administrator = User::factory()->create();
         $administratorRole = Role::findOrCreate('administrador');
         $administratorRole->givePermissionTo(Permission::findOrCreate('usuarios.resetear-dispositivo'));
@@ -131,6 +135,7 @@ class DeviceResetRequestTest extends TestCase
         ]);
         $this->assertSame(DispositivoUsuario::ESTADO_INACTIVO, $device->fresh()->estado);
         $this->assertSame(0, DB::table('sessions')->where('user_id', $user->id)->count());
+        Notification::assertSentTo($user, DeviceResetCompleted::class);
     }
 
     public function test_super_administrator_can_view_requests_without_explicit_permission(): void
@@ -156,6 +161,8 @@ class DeviceResetRequestTest extends TestCase
 
     public function test_user_without_permission_cannot_view_or_approve_requests(): void
     {
+        Notification::fake();
+
         $administrator = User::factory()->create();
         $user = User::factory()->create();
         $resetRequest = SolicitudReseteoDispositivo::factory()->for($user, 'usuario')->create();
@@ -171,6 +178,7 @@ class DeviceResetRequestTest extends TestCase
             ->assertForbidden();
 
         $this->assertSame(SolicitudReseteoDispositivo::ESTADO_PENDIENTE, $resetRequest->fresh()->estado);
+        Notification::assertNothingSent();
     }
 
     private function requestReset(User $user): TestResponse
