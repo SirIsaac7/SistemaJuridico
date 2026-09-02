@@ -2,6 +2,7 @@
 
 return [
     'super_admin_role' => 'super-administrador',
+    'admin_role' => 'administrador',
     'docente_role' => 'docente',
     'estudiante_role' => 'estudiante',
 
@@ -36,9 +37,11 @@ return [
             'description' => 'Controla materias, archivos privados y solicitudes de acceso.',
             'permissions' => [
                 ['name' => 'libros.ver', 'label' => 'Ingresar al módulo Libros'],
+                ['name' => 'libros.administracion.ver', 'label' => 'Supervisar todas las materias, archivos y estudiantes inscritos'],
                 ['name' => 'libros.catalogo.ver', 'label' => 'Ver el catálogo de materias'],
                 ['name' => 'libros.materias.ver', 'label' => 'Ver materias propias'],
                 ['name' => 'libros.materias.crear', 'label' => 'Crear materias'],
+                ['name' => 'libros.materias.crear-para-docente', 'label' => 'Crear materias para un docente'],
                 ['name' => 'libros.materias.editar', 'label' => 'Editar materias propias'],
                 ['name' => 'libros.materias.cambiar-estado', 'label' => 'Inhabilitar o reactivar materias propias'],
                 ['name' => 'libros.archivos.ver', 'label' => 'Ver archivos propios'],
@@ -55,6 +58,11 @@ return [
     ],
 
     'default_role_permissions' => [
+        'administrador' => [
+            'libros.ver',
+            'libros.administracion.ver',
+            'libros.materias.crear-para-docente',
+        ],
         'docente' => [
             'libros.ver',
             'libros.materias.ver',

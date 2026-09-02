@@ -1,6 +1,8 @@
+import { PasswordRequirements } from '@/components/password-requirements';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type ManagedUser, type UserRoleOption } from '@/features/users/types';
 import { useForm } from '@inertiajs/react';
@@ -175,9 +177,8 @@ export function UserFormDialog({ open, roles, user = null, onOpenChange }: UserF
                                 {isEditing ? 'Nueva contraseña' : 'Contraseña'}
                                 {isEditing && <span className="text-muted-foreground font-normal"> (opcional)</span>}
                             </label>
-                            <Input
+                            <PasswordInput
                                 id="user-password"
-                                type="password"
                                 value={data.password}
                                 onChange={(event) => updateField('password', event.target.value)}
                                 autoComplete="new-password"
@@ -191,14 +192,17 @@ export function UserFormDialog({ open, roles, user = null, onOpenChange }: UserF
                             <label htmlFor="user-password-confirmation" className="text-foreground text-sm font-semibold">
                                 Confirmar contraseña
                             </label>
-                            <Input
+                            <PasswordInput
                                 id="user-password-confirmation"
-                                type="password"
                                 value={data.password_confirmation}
                                 onChange={(event) => updateField('password_confirmation', event.target.value)}
                                 autoComplete="new-password"
                                 className="h-11"
                             />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                            <PasswordRequirements password={data.password} />
                         </div>
                     </div>
 

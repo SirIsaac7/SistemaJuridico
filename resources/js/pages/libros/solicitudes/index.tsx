@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { EmptyLibrary } from '@/features/libros/components/empty-library';
+import { LibrosModuleNav } from '@/features/libros/components/libros-module-nav';
 import { LibrosPageHeader } from '@/features/libros/components/libros-page-header';
 import { SolicitudStatus } from '@/features/libros/components/solicitud-status';
 import { SolicitudTabs } from '@/features/libros/components/solicitud-tabs';
@@ -27,7 +28,7 @@ export default function Solicitudes({ solicitudes, filters }: SolicitudesProps) 
 
             <main className="flex flex-1 flex-col gap-6 bg-[#f6f9fc] p-4 sm:p-6 lg:p-8 dark:bg-[#152033]">
                 <LibrosPageHeader
-                    eyebrow="Libros · Estudiante"
+                    eyebrow="Libros · Accesos"
                     title="Mis solicitudes"
                     description="Consulta el estado de cada materia solicitada y el motivo cuando una solicitud sea rechazada."
                     icon={<ClipboardList className="size-4" />}
@@ -39,6 +40,8 @@ export default function Solicitudes({ solicitudes, filters }: SolicitudesProps) 
                         </Button>
                     }
                 />
+
+                <LibrosModuleNav />
 
                 <SolicitudTabs current={filters.estado} baseUrl="/libros/solicitudes" />
 

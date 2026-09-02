@@ -3,9 +3,11 @@ import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import InputError from '@/components/input-error';
+import { PasswordRequirements } from '@/components/password-requirements';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
 
 interface RegisterForm extends Record<string, string> {
@@ -78,9 +80,8 @@ export default function Register() {
                         <Label htmlFor="password" className="font-semibold text-[#2a3547] dark:text-white">
                             Contraseña
                         </Label>
-                        <Input
+                        <PasswordInput
                             id="password"
-                            type="password"
                             required
                             tabIndex={3}
                             autoComplete="new-password"
@@ -91,15 +92,15 @@ export default function Register() {
                             className="h-11 border-[#dfe5ef] bg-white focus-visible:border-[#5d87ff] focus-visible:ring-[#5d87ff]/20 dark:border-[#465670] dark:bg-[#1c2536]"
                         />
                         <InputError message={errors.password} />
+                        <PasswordRequirements password={data.password} />
                     </div>
 
                     <div className="grid gap-2">
                         <Label htmlFor="password_confirmation" className="font-semibold text-[#2a3547] dark:text-white">
                             Confirmar contraseña
                         </Label>
-                        <Input
+                        <PasswordInput
                             id="password_confirmation"
-                            type="password"
                             required
                             tabIndex={4}
                             autoComplete="new-password"

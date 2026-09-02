@@ -3,9 +3,11 @@ import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import InputError from '@/components/input-error';
+import { PasswordRequirements } from '@/components/password-requirements';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import AuthLayout from '@/layouts/auth-layout';
 
 interface ResetPasswordProps {
@@ -58,9 +60,8 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
 
                     <div className="grid gap-2">
                         <Label htmlFor="password">Password</Label>
-                        <Input
+                        <PasswordInput
                             id="password"
-                            type="password"
                             name="password"
                             autoComplete="new-password"
                             value={data.password}
@@ -70,13 +71,13 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                             placeholder="Password"
                         />
                         <InputError message={errors.password} />
+                        <PasswordRequirements password={data.password} />
                     </div>
 
                     <div className="grid gap-2">
                         <Label htmlFor="password_confirmation">Confirm password</Label>
-                        <Input
+                        <PasswordInput
                             id="password_confirmation"
-                            type="password"
                             name="password_confirmation"
                             autoComplete="new-password"
                             value={data.password_confirmation}

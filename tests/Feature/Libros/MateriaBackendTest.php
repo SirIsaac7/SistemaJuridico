@@ -96,11 +96,13 @@ class MateriaBackendTest extends TestCase
             ->get(route('libros.materias.show', $materia))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('libros/docente/materias/show', false)
+                ->component('libros/materias/show', false)
                 ->where('materia.id', $materia->id)
                 ->has('materia.archivos', 1)
                 ->where('materia.archivos.0.id', $archivo->id)
-                ->where('materia.archivos.0.titulo', 'Constitución Política del Estado'));
+                ->where('materia.archivos.0.titulo', 'Constitución Política del Estado')
+                ->where('context.can_manage', true)
+                ->where('context.can_supervise', false));
     }
 
     public function test_student_catalog_exposes_only_subject_and_teacher_identity(): void

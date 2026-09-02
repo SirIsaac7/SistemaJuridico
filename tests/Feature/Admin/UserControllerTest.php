@@ -75,8 +75,8 @@ class UserControllerTest extends TestCase
         $response = $this->actingAs($administrator)->post('/users', [
             'name' => 'Ana Pérez',
             'email' => 'ANA@EXAMPLE.COM',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
             'role_id' => $role->id,
         ]);
 
@@ -95,8 +95,8 @@ class UserControllerTest extends TestCase
         $response = $this->actingAs($administrator)->from('/users')->post('/users', [
             'name' => 'Otra Ana',
             'email' => 'ana@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
             'role_id' => $role->id,
         ]);
 

@@ -311,7 +311,7 @@ export default function ArchivoConcedidoVisor({ materia, archivo }: VisorProps) 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
         { title: 'Libros', href: '/libros' },
-        { title: materia.nombre, href: `/libros/mis-materias/${materia.id}` },
+        { title: materia.nombre, href: `/libros/materias/${materia.id}` },
         { title: archivo.titulo, href: '#' },
     ];
 
@@ -326,7 +326,7 @@ export default function ArchivoConcedidoVisor({ materia, archivo }: VisorProps) 
                     <header className="border-border bg-background flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="min-w-0">
                             <Link
-                                href={`/libros/mis-materias/${materia.id}`}
+                                href={`/libros/materias/${materia.id}`}
                                 className="inline-flex items-center gap-2 text-xs font-semibold text-[#5d87ff] hover:underline dark:text-blue-300"
                             >
                                 <ArrowLeft className="size-3.5" /> Volver a {materia.nombre}

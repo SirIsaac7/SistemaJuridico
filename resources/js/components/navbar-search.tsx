@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { Link } from '@inertiajs/react';
-import { KeyRound, LayoutDashboard, Palette, Search, UserRound, type LucideIcon } from 'lucide-react';
+import { KeyRound, LayoutDashboard, Search, UserRound, type LucideIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 interface SearchItem {
@@ -11,10 +11,9 @@ interface SearchItem {
 }
 
 const searchItems: SearchItem[] = [
-    { title: 'Dashboard', description: 'Resumen del Sistema Jurídico', href: '/dashboard', icon: LayoutDashboard },
+    { title: 'Panel principal', description: 'Resumen del Sistema Jurídico', href: '/dashboard', icon: LayoutDashboard },
     { title: 'Mi perfil', description: 'Datos personales de la cuenta', href: '/settings/profile', icon: UserRound },
     { title: 'Contraseña', description: 'Seguridad y acceso', href: '/settings/password', icon: KeyRound },
-    { title: 'Apariencia', description: 'Tema claro, oscuro o del sistema', href: '/settings/appearance', icon: Palette },
 ];
 
 interface NavbarSearchProps {

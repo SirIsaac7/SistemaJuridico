@@ -3,58 +3,22 @@
 namespace App\Http\Controllers\Libros;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Libros\IndexMateriaRequest;
 use App\Http\Requests\Libros\StoreMateriaRequest;
 use App\Http\Requests\Libros\UpdateMateriaRequest;
+use App\Models\AccesoMateria;
 use App\Models\Archivo;
 use App\Models\Materia;
+use App\Services\Libros\MateriaAccessService;
 use App\Services\Libros\MateriaService;
 use App\Support\DateTimeFormatter;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class MateriaController extends Controller
 {
-    public function index(IndexMateriaRequest $request): Response
-    {
-        $estado = $request->validated('estado', 'activas');
-        $materias = Materia::query()
-            ->delDocente($request->user())
-            ->when($estado === 'activas', fn (Builder $query): Builder => $query->activas())
-            ->when($estado === 'inactivas', fn (Builder $query): Builder => $query->inactivas())
-            ->withCount([
-                'archivos',
-                'archivos as archivos_activos_count' => fn (Builder $query): Builder => $query->activos(),
-                'solicitudesAcceso as solicitudes_pendientes_count' => fn (Builder $query): Builder => $query->pendientes(),
-            ])
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->get()
-            ->map(fn (Materia $materia): array => [
-                'id' => $materia->id,
-                'nombre' => $materia->nombre,
-                'descripcion' => $materia->descripcion,
-                'is_active' => $materia->is_active,
-                'archivos_count' => $materia->archivos_count,
-                'archivos_activos_count' => $materia->archivos_activos_count,
-                'solicitudes_pendientes_count' => $materia->solicitudes_pendientes_count,
-                'created_at' => DateTimeFormatter::forDisplay($materia->created_at),
-                'can' => [
-                    'update' => Gate::allows('update', $materia),
-                    'update_status' => Gate::allows('updateStatus', $materia),
-                ],
-            ]);
-
-        return Inertia::render('libros/docente/materias/index', [
-            'materias' => $materias,
-            'filters' => ['estado' => $estado],
-            'can' => ['create' => Gate::allows('create', Materia::class)],
-        ]);
-    }
-
     public function store(StoreMateriaRequest $request, MateriaService $service): RedirectResponse
     {
         $service->create($request->user(), $request->validated());
@@ -62,22 +26,53 @@ class MateriaController extends Controller
         return back()->with('success', 'La materia fue creada correctamente.');
     }
 
-    public function show(Materia $materia): Response
-    {
-        Gate::authorize('view', $materia);
+    public function show(
+        Request $request,
+        Materia $materia,
+        MateriaAccessService $accessService,
+    ): Response {
+        $user = $request->user();
+        $context = $accessService->resolve($user, $materia);
+        $canManage = $context['can_manage'];
+        $canSupervise = $context['can_supervise'];
+        /** @var AccesoMateria|null $access */
+        $access = $context['access'];
 
         $materia->load([
+            'docente:id,name,email',
             'archivos' => fn ($query) => $query
+                ->when(! $canManage && ! $canSupervise, fn ($files) => $files
+                    ->activos()
+                    ->whereIn('tipo', Archivo::TIPOS_VISUALIZABLES))
                 ->orderByDesc('created_at')
                 ->orderByDesc('id'),
         ]);
 
-        return Inertia::render('libros/docente/materias/show', [
+        if ($canSupervise) {
+            $materia->load([
+                'accesosConcedidos' => fn ($query) => $query
+                    ->with(['usuario:id,name,email', 'solicitud:id,universidad'])
+                    ->orderByDesc('fecha_inicio')
+                    ->orderByDesc('id'),
+            ]);
+        }
+
+        return Inertia::render('libros/materias/show', [
             'materia' => [
                 'id' => $materia->id,
                 'nombre' => $materia->nombre,
                 'descripcion' => $materia->descripcion,
                 'is_active' => $materia->is_active,
+                'created_at' => DateTimeFormatter::forDisplay($materia->created_at),
+                'docente' => [
+                    'id' => $materia->docente->id,
+                    'nombre' => $materia->docente->name,
+                    'email' => $materia->docente->email,
+                ],
+                'access' => $access ? [
+                    'fecha_inicio' => DateTimeFormatter::forDisplay($access->fecha_inicio),
+                    'fecha_fin' => DateTimeFormatter::forDisplay($access->fecha_fin),
+                ] : null,
                 'archivos' => $materia->archivos->map(fn (Archivo $archivo): array => [
                     'id' => $archivo->id,
                     'titulo' => $archivo->titulo,
@@ -89,17 +84,43 @@ class MateriaController extends Controller
                     'tamano_bytes' => $archivo->tamano_bytes,
                     'is_active' => $archivo->is_active,
                     'created_at' => DateTimeFormatter::forDisplay($archivo->created_at),
+                    'view_url' => $canManage
+                        ? route('libros.materias.archivos.contenido', [$materia, $archivo])
+                        : ($canSupervise
+                            ? route('libros.administracion.materias.archivos.contenido', [$materia, $archivo])
+                            : route('libros.mis-materias.archivos.visor', [$materia, $archivo])),
                     'can' => [
-                        'view' => Gate::allows('view', $archivo),
-                        'update' => Gate::allows('update', $archivo),
-                        'update_status' => Gate::allows('updateStatus', $archivo),
+                        'view' => true,
+                        'update' => $canManage && Gate::forUser($user)->allows('update', $archivo),
+                        'update_status' => $canManage && Gate::forUser($user)->allows('updateStatus', $archivo),
                     ],
                 ]),
+                'students' => $canSupervise
+                    ? $materia->accesosConcedidos->map(fn (AccesoMateria $studentAccess): array => [
+                        'id' => $studentAccess->id,
+                        'estudiante' => [
+                            'id' => $studentAccess->usuario->id,
+                            'nombre' => $studentAccess->usuario->name,
+                            'email' => $studentAccess->usuario->email,
+                        ],
+                        'universidad' => $studentAccess->solicitud->universidad,
+                        'is_current' => $studentAccess->is_active
+                            && ($studentAccess->fecha_fin === null || $studentAccess->fecha_fin->isFuture())
+                            && $materia->is_active,
+                        'fecha_inicio' => DateTimeFormatter::forDisplay($studentAccess->fecha_inicio),
+                        'fecha_fin' => DateTimeFormatter::forDisplay($studentAccess->fecha_fin),
+                    ])
+                    : null,
+            ],
+            'context' => [
+                'can_supervise' => $canSupervise,
+                'can_manage' => $canManage,
+                'has_granted_access' => $access !== null,
             ],
             'can' => [
-                'upload_file' => Gate::allows('create', [Archivo::class, $materia]),
-                'update' => Gate::allows('update', $materia),
-                'update_status' => Gate::allows('updateStatus', $materia),
+                'upload_file' => $canManage && Gate::forUser($user)->allows('create', [Archivo::class, $materia]),
+                'update' => $canManage && Gate::forUser($user)->allows('update', $materia),
+                'update_status' => $canManage && Gate::forUser($user)->allows('updateStatus', $materia),
             ],
         ]);
     }

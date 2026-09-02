@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { EmptyLibrary } from '@/features/libros/components/empty-library';
+import { LibrosModuleNav } from '@/features/libros/components/libros-module-nav';
 import { LibrosPageHeader } from '@/features/libros/components/libros-page-header';
 import { RespuestaSolicitudDialog } from '@/features/libros/components/respuesta-solicitud-dialog';
 import { SolicitudStatus } from '@/features/libros/components/solicitud-status';
@@ -34,11 +35,13 @@ export default function SolicitudesRecibidas({ solicitudes, filters }: Solicitud
 
             <main className="flex flex-1 flex-col gap-6 bg-[#f6f9fc] p-4 sm:p-6 lg:p-8 dark:bg-[#152033]">
                 <LibrosPageHeader
-                    eyebrow="Libros · Docente"
+                    eyebrow="Libros · Gestión"
                     title="Solicitudes recibidas"
                     description="Acepta o rechaza únicamente las solicitudes correspondientes a tus materias."
                     icon={<ClipboardList className="size-4" />}
                 />
+
+                <LibrosModuleNav />
 
                 <SolicitudTabs current={filters.estado} baseUrl="/libros/solicitudes-recibidas" />
 

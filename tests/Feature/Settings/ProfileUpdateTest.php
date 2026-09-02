@@ -61,39 +61,45 @@ class ProfileUpdateTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_delete_their_account()
-    {
-        $user = User::factory()->create();
-
-        $response = $this
-            ->actingAs($user)
-            ->delete('/settings/profile', [
-                'password' => 'password',
-            ]);
-
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/');
-
-        $this->assertGuest();
-        $this->assertSoftDeleted($user);
-    }
-
-    public function test_correct_password_must_be_provided_to_delete_account()
+    public function test_profile_validation_messages_are_displayed_in_spanish()
     {
         $user = User::factory()->create();
 
         $response = $this
             ->actingAs($user)
             ->from('/settings/profile')
-            ->delete('/settings/profile', [
-                'password' => 'wrong-password',
+            ->patch('/settings/profile', [
+                'name' => '',
+                'email' => '',
             ]);
 
-        $response
-            ->assertSessionHasErrors('password')
-            ->assertRedirect('/settings/profile');
+        $response->assertRedirect('/settings/profile')->assertSessionHasErrors([
+            'name' => 'Ingresa tu nombre.',
+            'email' => 'Ingresa tu correo electrónico.',
+        ]);
+    }
 
-        $this->assertNotNull($user->fresh());
+    public function test_account_deletion_endpoint_is_not_available()
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->delete('/settings/profile');
+
+        $response->assertMethodNotAllowed();
+
+        $this->assertNotSoftDeleted($user);
+    }
+
+    public function test_appearance_settings_page_is_not_available()
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->get('/settings/appearance');
+
+        $response->assertNotFound();
     }
 }

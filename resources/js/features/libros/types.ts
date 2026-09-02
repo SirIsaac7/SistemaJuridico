@@ -1,21 +1,6 @@
 export type EstadoSolicitud = 'pendiente' | 'aceptada' | 'rechazada';
 export type TipoArchivo = 'pdf' | 'video' | 'imagen' | 'flujograma' | 'documento' | 'otro';
 
-export interface MateriaResumen {
-    id: number;
-    nombre: string;
-    descripcion: string | null;
-    is_active: boolean;
-    archivos_count: number;
-    archivos_activos_count: number;
-    solicitudes_pendientes_count: number;
-    created_at: string | null;
-    can: {
-        update: boolean;
-        update_status: boolean;
-    };
-}
-
 export interface ArchivoLibro {
     id: number;
     titulo: string;
@@ -27,6 +12,7 @@ export interface ArchivoLibro {
     tamano_bytes: number;
     is_active: boolean;
     created_at: string | null;
+    view_url?: string;
     can: {
         view: boolean;
         update: boolean;
@@ -34,12 +20,47 @@ export interface ArchivoLibro {
     };
 }
 
-export interface MateriaDetalle {
+export interface MateriaUnificadaResumen {
     id: number;
     nombre: string;
     descripcion: string | null;
     is_active: boolean;
+    docente: {
+        id: number;
+        nombre: string;
+        email: string;
+    };
+    archivos_count: number;
+    archivos_activos_count: number;
+    solicitudes_pendientes_count: number;
+    estudiantes_activos_count: number;
+    fecha_inicio: string | null;
+    fecha_fin: string | null;
+    created_at: string | null;
+    context: {
+        can_supervise: boolean;
+        can_manage: boolean;
+        has_granted_access: boolean;
+    };
+}
+
+export interface MateriaUnificadaDetalle {
+    id: number;
+    nombre: string;
+    descripcion: string | null;
+    is_active: boolean;
+    created_at: string | null;
+    docente: {
+        id: number;
+        nombre: string;
+        email: string;
+    };
+    access: {
+        fecha_inicio: string | null;
+        fecha_fin: string | null;
+    } | null;
     archivos: ArchivoLibro[];
+    students: AccesoMateriaResumen[] | null;
 }
 
 export interface MateriaCatalogo {
@@ -88,33 +109,15 @@ export interface SolicitudRecibida {
     fecha_respuesta: string | null;
 }
 
-export interface MateriaConcedidaResumen {
+export interface AccesoMateriaResumen {
     id: number;
-    nombre: string;
-    docente: string;
-    archivos_count: number;
+    estudiante: {
+        id: number;
+        nombre: string;
+        email: string;
+    };
+    universidad: string;
+    is_current: boolean;
     fecha_inicio: string | null;
     fecha_fin: string | null;
-}
-
-export interface ArchivoConcedido {
-    id: number;
-    titulo: string;
-    descripcion: string | null;
-    nombre_original: string;
-    tipo: TipoArchivo;
-    mime_type: string;
-    extension: string | null;
-    tamano_bytes: number;
-    created_at: string | null;
-}
-
-export interface MateriaConcedidaDetalle {
-    id: number;
-    nombre: string;
-    descripcion: string | null;
-    docente: string;
-    fecha_inicio: string | null;
-    fecha_fin: string | null;
-    archivos: ArchivoConcedido[];
 }

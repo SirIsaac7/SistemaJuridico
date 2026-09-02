@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserDeviceResetController;
 use App\Http\Controllers\Admin\UserStatusController;
+use App\Http\Controllers\Libros\ArchivoAdministrativoContenidoController;
 use App\Http\Controllers\Libros\ArchivoConcedidoContenidoController;
 use App\Http\Controllers\Libros\ArchivoConcedidoVisorController;
 use App\Http\Controllers\Libros\ArchivoContenidoController;
@@ -15,12 +16,13 @@ use App\Http\Controllers\Libros\ArchivoController;
 use App\Http\Controllers\Libros\ArchivoStatusController;
 use App\Http\Controllers\Libros\CatalogoMateriaController;
 use App\Http\Controllers\Libros\LibroController;
-use App\Http\Controllers\Libros\MateriaConcedidaController;
 use App\Http\Controllers\Libros\MateriaController;
+use App\Http\Controllers\Libros\MateriaDocenteController;
 use App\Http\Controllers\Libros\MateriaStatusController;
 use App\Http\Controllers\Libros\SolicitudAccesoController;
 use App\Http\Controllers\Libros\SolicitudRecibidaController;
 use App\Http\Controllers\Libros\SolicitudRespuestaController;
+use App\Models\Materia;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -55,6 +57,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [LibroController::class, 'index'])->name('index');
         Route::get('catalogo', CatalogoMateriaController::class)->name('catalogo.index');
 
+        Route::redirect('administracion', '/libros')->name('administracion.index');
+        Route::get('administracion/materias/{materia}', fn (Materia $materia) => to_route('libros.materias.show', $materia))
+            ->name('administracion.materias.show');
+        Route::scopeBindings()->get(
+            'administracion/materias/{materia}/archivos/{archivo}/contenido',
+            ArchivoAdministrativoContenidoController::class,
+        )->name('administracion.materias.archivos.contenido');
+
         Route::get('solicitudes', [SolicitudAccesoController::class, 'index'])
             ->name('solicitudes.index');
         Route::post('materias/{materia}/solicitudes', [SolicitudAccesoController::class, 'store'])
@@ -66,7 +76,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('solicitudes-recibidas/{solicitud}', SolicitudRespuestaController::class)
             ->name('solicitudes-recibidas.update');
 
-        Route::get('mis-materias/{materia}', [MateriaConcedidaController::class, 'show'])
+        Route::get('mis-materias/{materia}', fn (Materia $materia) => to_route('libros.materias.show', $materia))
             ->name('mis-materias.show');
 
         Route::scopeBindings()->group(function () {
@@ -80,8 +90,11 @@ Route::middleware(['auth'])->group(function () {
             )->name('mis-materias.archivos.contenido');
         });
 
+        Route::get('materias', fn () => to_route('libros.index'))->name('materias.index');
         Route::resource('materias', MateriaController::class)
-            ->only(['index', 'store', 'show', 'update']);
+            ->only(['store', 'show', 'update']);
+        Route::post('materias-para-docentes', [MateriaDocenteController::class, 'store'])
+            ->name('materias-para-docentes.store');
         Route::put('materias/{materia}/estado', MateriaStatusController::class)
             ->name('materias.estado.update');
 

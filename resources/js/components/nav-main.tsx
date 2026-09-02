@@ -3,11 +3,13 @@ import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, Sideba
 import { Icon } from '@iconify/react';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
+import { Fragment } from 'react';
 
 interface SidebarNavChild {
     title: string;
     href?: string;
     permission?: string;
+    group?: string;
 }
 
 export interface SidebarNavItem {
@@ -87,9 +89,24 @@ function NavMenuItem({ item, currentPath }: { item: SidebarNavItem; currentPath:
                     </CollapsibleTrigger>
                     <CollapsibleContent className="group-data-[collapsible=icon]:hidden">
                         <ul className="border-sidebar-border mt-1 ml-[21px] flex flex-col gap-0.5 border-l pl-3">
-                            {item.children.map((child) => (
-                                <SubmenuItem key={`${child.title}-${child.href ?? 'button'}`} item={child} currentPath={currentPath} />
-                            ))}
+                            {item.children.map((child, index) => {
+                                const showGroup = child.group && (index === 0 || item.children?.[index - 1]?.group !== child.group);
+
+                                return (
+                                    <Fragment key={`${child.title}-${child.href ?? 'button'}`}>
+                                        {showGroup && (
+                                            <li
+                                                className={`text-sidebar-foreground/55 px-2.5 pb-1 text-[10px] font-bold tracking-wider uppercase ${
+                                                    index === 0 ? 'pt-2' : 'pt-4'
+                                                }`}
+                                            >
+                                                {child.group}
+                                            </li>
+                                        )}
+                                        <SubmenuItem item={child} currentPath={currentPath} />
+                                    </Fragment>
+                                );
+                            })}
                         </ul>
                     </CollapsibleContent>
                 </SidebarMenuItem>

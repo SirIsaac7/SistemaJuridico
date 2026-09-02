@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyLibrary } from '@/features/libros/components/empty-library';
+import { LibrosModuleNav } from '@/features/libros/components/libros-module-nav';
 import { LibrosPageHeader } from '@/features/libros/components/libros-page-header';
 import { SolicitudFormDialog } from '@/features/libros/components/solicitud-form-dialog';
 import { type MateriaCatalogo } from '@/features/libros/types';
@@ -9,7 +10,7 @@ import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, BookOpen, CheckCircle2, LibraryBig, Send } from 'lucide-react';
+import { BookOpen, CheckCircle2, LibraryBig, Send } from 'lucide-react';
 import { useState } from 'react';
 
 interface CatalogoProps {
@@ -31,16 +32,14 @@ export default function Catalogo({ materias }: CatalogoProps) {
             <Head title="Agregar materia" />
 
             <main className="flex flex-1 flex-col gap-6 bg-[#f6f9fc] p-4 sm:p-6 lg:p-8 dark:bg-[#152033]">
-                <Link href="/libros" className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#5d87ff] hover:underline">
-                    <ArrowLeft className="size-4" /> Volver a mis materias
-                </Link>
-
                 <LibrosPageHeader
                     eyebrow="Catálogo"
                     title="Agregar materia"
                     description="Selecciona una materia y envía una solicitud al docente responsable."
                     icon={<LibraryBig className="size-4" />}
                 />
+
+                <LibrosModuleNav />
 
                 {materias.length === 0 ? (
                     <EmptyLibrary title="No hay materias disponibles" description="Los docentes todavía no publicaron materias activas." />

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use Inertia\Inertia;
 use Laravel\Fortify\Actions\AttemptToAuthenticate;
 use Laravel\Fortify\Actions\CanonicalizeUsername;
@@ -41,6 +42,12 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        PasswordRule::defaults(fn (): PasswordRule => PasswordRule::min(8)
+            ->mixedCase()
+            ->numbers()
+            ->symbols()
+            ->rules(['regex:/[\p{S}\p{P}]/u']));
+
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);

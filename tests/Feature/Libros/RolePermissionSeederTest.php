@@ -17,6 +17,7 @@ class RolePermissionSeederTest extends TestCase
 
         $docente = Role::findByName(config('access_control.docente_role'));
         $estudiante = Role::findByName(config('access_control.estudiante_role'));
+        $administrador = Role::findByName(config('access_control.admin_role'));
 
         $this->assertTrue($docente->hasPermissionTo('libros.materias.crear'));
         $this->assertTrue($docente->hasPermissionTo('libros.solicitudes.responder'));
@@ -24,5 +25,9 @@ class RolePermissionSeederTest extends TestCase
         $this->assertTrue($estudiante->hasPermissionTo('libros.catalogo.ver'));
         $this->assertTrue($estudiante->hasPermissionTo('libros.solicitudes.crear'));
         $this->assertFalse($estudiante->hasPermissionTo('libros.materias.crear'));
+        $this->assertTrue($administrador->hasPermissionTo('libros.ver'));
+        $this->assertTrue($administrador->hasPermissionTo('libros.administracion.ver'));
+        $this->assertTrue($administrador->hasPermissionTo('libros.materias.crear-para-docente'));
+        $this->assertFalse($administrador->hasPermissionTo('libros.materias.editar'));
     }
 }

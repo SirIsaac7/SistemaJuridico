@@ -14,6 +14,11 @@ class ArchivoPolicy
             && $user->can('libros.archivos.ver');
     }
 
+    public function viewAdministrative(User $user, Archivo $archivo): bool
+    {
+        return $user->can('libros.administracion.ver');
+    }
+
     public function create(User $user, Materia $materia): bool
     {
         return (int) $materia->docente_id === (int) $user->getKey()

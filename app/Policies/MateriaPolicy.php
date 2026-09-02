@@ -28,6 +28,11 @@ class MateriaPolicy
         return $user->can('libros.materias.crear');
     }
 
+    public function createForTeacher(User $user): bool
+    {
+        return $user->can('libros.materias.crear-para-docente');
+    }
+
     public function update(User $user, Materia $materia): bool
     {
         return $this->belongsToUser($materia, $user)

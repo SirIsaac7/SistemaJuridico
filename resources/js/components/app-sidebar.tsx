@@ -43,14 +43,9 @@ const navSections: SidebarNavSection[] = [
         items: [
             {
                 title: 'Libros',
+                href: '/libros',
                 icon: 'solar:book-bookmark-linear',
                 permission: 'libros.ver',
-                children: [
-                    { title: 'Mis materias', href: '/libros', permission: 'libros.solicitudes.ver-propias' },
-                    { title: 'Mis solicitudes', href: '/libros/solicitudes', permission: 'libros.solicitudes.ver-propias' },
-                    { title: 'Mis materias', href: '/libros/materias', permission: 'libros.materias.ver' },
-                    { title: 'Solicitudes recibidas', href: '/libros/solicitudes-recibidas', permission: 'libros.solicitudes.ver-recibidas' },
-                ],
             },
         ],
     },

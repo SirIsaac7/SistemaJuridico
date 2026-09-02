@@ -2,18 +2,17 @@
 
 namespace App\Http\Requests\Libros;
 
-use App\Models\Materia;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class IndexMateriaRequest extends FormRequest
+class IndexLibroRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user()?->can('viewAny', Materia::class) ?? false;
+        return $this->user()?->can('libros.ver') ?? false;
     }
 
     /**
@@ -24,6 +23,8 @@ class IndexMateriaRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'ambito' => ['nullable', 'string', 'in:todas,impartidas,concedidas'],
+            'buscar' => ['nullable', 'string', 'max:100'],
             'estado' => ['nullable', 'string', 'in:activas,inactivas,todas'],
         ];
     }
