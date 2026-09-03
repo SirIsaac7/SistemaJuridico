@@ -5,8 +5,8 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, BookOpen, ChevronLeft, ChevronRight, Minus, Pause, Play, Plus, Search } from 'lucide-react';
-import * as pdfjs from 'pdfjs-dist';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
+import pdfWorker from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 import { type FormEvent, type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react';
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
@@ -42,11 +42,13 @@ function useReadingFocus() {
     const [focusY, setFocusY] = useState(50);
 
     function followPointer(event: ReactPointerEvent<HTMLElement>) {
+        if (event.pointerType === 'touch' && event.type === 'pointermove') return;
+
         const bounds = event.currentTarget.getBoundingClientRect();
         if (bounds.height === 0) return;
 
         const relativeY = ((event.clientY - bounds.top) / bounds.height) * 100;
-        setFocusY(Math.min(88, Math.max(12, relativeY)));
+        setFocusY(Math.min(82.5, Math.max(17.5, relativeY)));
     }
 
     return { focusY, followPointer };
@@ -54,7 +56,7 @@ function useReadingFocus() {
 
 function ReadingFocus({ focusY }: { focusY: number }) {
     return (
-        <div className="pointer-events-none absolute inset-0 z-10 [--focus-half:36px] sm:[--focus-half:42px] lg:[--focus-half:48px]">
+        <div className="pointer-events-none absolute inset-0 z-10 [--focus-half:17.5%]">
             <div
                 className="absolute inset-x-0 top-0 border-b border-slate-500/20 bg-white/5 backdrop-blur-[6px] dark:border-white/15 dark:bg-slate-950/5"
                 style={{ height: `max(0px, calc(${focusY}% - var(--focus-half)))` }}
@@ -205,11 +207,11 @@ function PdfViewer({ url }: { url: string }) {
                 </div>
             </div>
             <div
-                className="relative flex min-h-[70vh] justify-center overflow-auto bg-[#e8eef6] p-3 sm:p-8 dark:bg-[#1d2a3d]"
+                className="relative flex min-h-[70vh] justify-start overflow-auto bg-[#e8eef6] p-3 sm:p-8 dark:bg-[#1d2a3d]"
                 onContextMenu={(event) => event.preventDefault()}
             >
                 <div
-                    className="relative h-fit w-fit touch-pan-y overflow-hidden shadow-2xl"
+                    className="relative mx-auto h-fit w-fit shrink-0 touch-auto overflow-hidden shadow-2xl"
                     onPointerDown={followPointer}
                     onPointerMove={followPointer}
                 >
@@ -230,7 +232,7 @@ function ImageViewer({ url, title }: { url: string; title: string }) {
             className="relative flex min-h-[75vh] items-center justify-center overflow-auto bg-[#e8eef6] p-3 sm:p-8 dark:bg-[#1d2a3d]"
             onContextMenu={(event) => event.preventDefault()}
         >
-            <div className="relative touch-pan-y overflow-hidden shadow-2xl" onPointerDown={followPointer} onPointerMove={followPointer}>
+            <div className="relative touch-auto overflow-hidden shadow-2xl" onPointerDown={followPointer} onPointerMove={followPointer}>
                 <img src={url} alt={title} draggable={false} className="block max-h-[80vh] max-w-full select-none" />
                 <ReadingFocus focusY={focusY} />
                 <Watermark />

@@ -1,4 +1,3 @@
-import { NavbarNotifications } from '@/components/navbar-notifications';
 import { NavbarSearch } from '@/components/navbar-search';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -60,7 +59,6 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                     >
                         {isDark ? <Sun className="size-5" strokeWidth={1.8} /> : <Moon className="size-5" strokeWidth={1.8} />}
                     </Button>
-                    <NavbarNotifications />
                 </div>
             </nav>
         </header>

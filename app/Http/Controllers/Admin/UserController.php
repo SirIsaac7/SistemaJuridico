@@ -80,6 +80,7 @@ class UserController extends Controller
 
         DB::transaction(function () use ($data, $role): void {
             $user = User::create($data);
+            $user->markEmailAsVerified();
             $user->syncRoles([$role]);
         });
 

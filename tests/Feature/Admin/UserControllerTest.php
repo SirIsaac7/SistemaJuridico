@@ -84,6 +84,7 @@ class UserControllerTest extends TestCase
         $user = User::query()->where('email', 'ana@example.com')->firstOrFail();
         $this->assertTrue($user->hasExactRoles($role));
         $this->assertTrue($user->is_active);
+        $this->assertTrue($user->hasVerifiedEmail());
     }
 
     public function test_duplicate_email_is_rejected_with_visible_message(): void

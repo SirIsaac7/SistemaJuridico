@@ -145,7 +145,7 @@ class DeviceAccessTest extends TestCase
                 ]
                 && str_contains($html, 'Sistema Jurídico')
                 && str_contains($html, 'Ya puedes iniciar sesión desde otro dispositivo y navegador.')
-                && str_contains($html, 'http://localhost/login')
+                && str_contains($html, route('login'))
                 && str_contains($text, 'Ya puedes iniciar sesión desde otro dispositivo y navegador.')
                 && ! str_contains($html, 'Regards,');
         });

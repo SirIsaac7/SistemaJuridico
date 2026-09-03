@@ -20,8 +20,12 @@ class FortifyRegisterResponse implements RegisterResponse
 
         $this->deviceSession->establish($request);
 
-        return $request->wantsJson()
-            ? new JsonResponse('', 201)
-            : redirect()->intended(route('dashboard', absolute: false));
+        if ($request->wantsJson()) {
+            return new JsonResponse('', 201);
+        }
+
+        return $request->user()?->hasVerifiedEmail()
+            ? redirect()->intended(route('dashboard', absolute: false))
+            : to_route('verification.notice');
     }
 }
