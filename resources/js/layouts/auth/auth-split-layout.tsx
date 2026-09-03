@@ -16,7 +16,7 @@ function LegalBrand({ compact = false }: { compact?: boolean }) {
                 <Scale className="size-6" strokeWidth={1.8} />
             </div>
             <div className={compact ? 'leading-tight' : 'leading-none'}>
-                <p className="text-lg font-bold tracking-tight text-[#2a3547] dark:text-white">Sistema Jurídico</p>
+                <p className="text-lg font-bold tracking-tight text-[#2a3547] dark:text-white">Normativa Virtual</p>
                 <p className="mt-1 text-[10px] font-semibold tracking-[0.2em] text-[#7c8fac] uppercase">Gestión legal</p>
             </div>
         </div>

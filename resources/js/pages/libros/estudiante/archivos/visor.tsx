@@ -30,7 +30,7 @@ function Watermark() {
         <div className="pointer-events-none absolute inset-0 z-20 grid grid-cols-2 content-around overflow-hidden opacity-20 select-none sm:grid-cols-3">
             {Array.from({ length: 15 }, (_, index) => (
                 <span key={index} className="flex -rotate-12 flex-col px-3 text-center text-xs font-bold text-white mix-blend-difference">
-                    <span>Documento protegido — Sistema Jurídico</span>
+                    <span>Documento protegido — Normativa Virtual</span>
                     <span>Contenido de uso personal</span>
                 </span>
             ))}

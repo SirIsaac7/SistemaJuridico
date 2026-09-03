@@ -25,6 +25,7 @@ class VerifyEmail extends BaseVerifyEmail implements ShouldQueueAfterCommit
         $viewData = [
             'name' => $notifiable->name,
             'verificationUrl' => $this->verificationUrl($notifiable),
+            'brandIconUrl' => asset('assets/landing/normativa-virtual-email.png'),
             'expiresInMinutes' => (int) config('auth.verification.expire', 60),
             'year' => now()->year,
         ];

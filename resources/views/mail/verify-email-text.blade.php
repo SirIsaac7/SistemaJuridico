@@ -1,4 +1,4 @@
-SISTEMA JURÍDICO
+NORMATIVA VIRTUAL
 Verificación de identidad
 
 Confirma tu correo
@@ -13,5 +13,5 @@ El enlace vence en {{ $expiresInMinutes }} minutos. Puedes abrirlo desde tu celu
 
 Si no creaste esta cuenta, puedes ignorar este mensaje.
 
-© {{ $year }} Sistema Jurídico. Todos los derechos reservados.
+© {{ $year }} Normativa Virtual. Todos los derechos reservados.
 Este es un mensaje automático; no respondas a este correo.

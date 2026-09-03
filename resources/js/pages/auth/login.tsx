@@ -39,7 +39,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     };
 
     return (
-        <AuthSplitLayout view="login" title="Bienvenido de nuevo" description="Ingresa tus credenciales para acceder a Sistema Jurídico.">
+        <AuthSplitLayout view="login" title="Bienvenido de nuevo" description="Ingresa tus credenciales para acceder a Normativa Virtual.">
             <Head title="Iniciar sesión" />
 
             {status && (

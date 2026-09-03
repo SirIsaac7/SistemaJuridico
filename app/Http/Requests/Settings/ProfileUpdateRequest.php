@@ -2,10 +2,8 @@
 
 namespace App\Http\Requests\Settings;
 
-use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
@@ -18,15 +16,7 @@ class ProfileUpdateRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
-            ],
+            'email' => ['prohibited'],
         ];
     }
 
@@ -39,10 +29,7 @@ class ProfileUpdateRequest extends FormRequest
             'name.required' => 'Ingresa tu nombre.',
             'name.string' => 'El nombre debe ser un texto válido.',
             'name.max' => 'El nombre no puede superar los 255 caracteres.',
-            'email.required' => 'Ingresa tu correo electrónico.',
-            'email.email' => 'Ingresa un correo electrónico válido.',
-            'email.max' => 'El correo electrónico no puede superar los 255 caracteres.',
-            'email.unique' => 'Este correo electrónico ya está registrado.',
+            'email.prohibited' => 'El correo electrónico no puede modificarse desde el perfil.',
         ];
     }
 }

@@ -1,7 +1,7 @@
 import { ShieldCheck } from 'lucide-react';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 
-const CLIPBOARD_MESSAGE = 'Documento protegido — Sistema Jurídico.\nContenido de uso personal.';
+const CLIPBOARD_MESSAGE = 'Documento protegido — Normativa Virtual.\nContenido de uso personal.';
 
 interface ProteccionCapturaProps {
     children: ReactNode;
@@ -113,7 +113,7 @@ export function ProteccionCaptura({ children }: ProteccionCapturaProps) {
             <div className="fixed inset-0 z-[110] hidden place-items-center bg-white text-center text-black print:grid">
                 <div>
                     <ShieldCheck className="mx-auto size-12" />
-                    <p className="mt-4 font-bold">Documento protegido — Sistema Jurídico</p>
+                    <p className="mt-4 font-bold">Documento protegido — Normativa Virtual</p>
                     <p className="mt-1 text-sm">Contenido de uso personal.</p>
                 </div>
             </div>

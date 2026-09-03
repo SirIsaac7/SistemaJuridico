@@ -1,31 +1,56 @@
 import 'swiper/css';
+import {
+    BookOpen,
+    BookOpenCheck,
+    ChartNoAxesColumnIncreasing,
+    ClipboardList,
+    Files,
+    KeyRound,
+    LibraryBig,
+    Search,
+    ShieldCheck,
+    UserCheck,
+    Users,
+    type LucideIcon,
+} from 'lucide-react';
 import { Autoplay } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-import iconBriefcase from '../assets/icon-briefcase.svg';
-import iconConnect from '../assets/icon-connect.svg';
-import iconFavorites from '../assets/icon-favorites.svg';
-import iconMailbox from '../assets/icon-mailbox.svg';
-import iconSpeechBubble from '../assets/icon-speech-bubble.svg';
-import iconUser from '../assets/icon-user-male.svg';
+import type { DashboardCardData, DashboardTone } from '../types';
 import { CardBox } from './card-box';
 
-const summaryCards = [
-    { title: 'Expedientes', value: '124+', image: iconConnect, background: 'bg-[#8754ec]/10', text: 'text-[#8754ec]' },
-    { title: 'Clientes', value: '96', image: iconUser, background: 'bg-[#13deb9]/10', text: 'text-[#0f9f86]' },
-    { title: 'Audiencias', value: '10+', image: iconSpeechBubble, background: 'bg-[#ef4444]/10', text: 'text-[#ef4444]' },
-    { title: 'Notificaciones', value: '8+', image: iconMailbox, background: 'bg-[#49beff]/10', text: 'text-[#258ec8]' },
-    { title: 'Causas activas', value: '78', image: iconBriefcase, background: 'bg-[#f6b51e]/10', text: 'text-[#b47a00]' },
-    { title: 'Abogados', value: '24', image: iconUser, background: 'bg-[#5d87ff]/10', text: 'text-[#5d87ff]' },
-    { title: 'Documentos', value: '696', image: iconFavorites, background: 'bg-[#ef4444]/10', text: 'text-[#ef4444]' },
-] as const;
+const toneStyles: Record<DashboardTone, { background: string; text: string }> = {
+    blue: { background: 'bg-[#5d87ff]/10', text: 'text-[#5d87ff]' },
+    cyan: { background: 'bg-[#49beff]/10', text: 'text-[#258ec8]' },
+    green: { background: 'bg-[#13deb9]/10', text: 'text-[#0f9f86]' },
+    violet: { background: 'bg-[#8754ec]/10', text: 'text-[#8754ec]' },
+    amber: { background: 'bg-[#f6b51e]/10', text: 'text-[#b47a00]' },
+    red: { background: 'bg-[#ef4444]/10', text: 'text-[#ef4444]' },
+    slate: { background: 'bg-[#7c8fac]/10', text: 'text-[#62728a]' },
+};
 
-export function TopCards() {
+const cardIcons: Record<string, LucideIcon> = {
+    usuarios: Users,
+    'usuarios-activos': UserCheck,
+    roles: ShieldCheck,
+    materias: LibraryBig,
+    'mis-materias': BookOpen,
+    catalogo: Search,
+    archivos: Files,
+    'mis-archivos': Files,
+    solicitudes: ClipboardList,
+    'solicitudes-recibidas': ClipboardList,
+    'mis-solicitudes': ClipboardList,
+    accesos: KeyRound,
+    'mis-accesos': BookOpenCheck,
+};
+
+export function TopCards({ cards }: { cards: DashboardCardData[] }) {
     return (
         <Swiper
-            slidesPerView={6}
+            slidesPerView={Math.min(cards.length, 6)}
             spaceBetween={24}
-            loop
+            loop={cards.length > 6}
             freeMode
             grabCursor
             speed={5000}
@@ -38,21 +63,30 @@ export function TopCards() {
                 1030: { slidesPerView: 4, spaceBetween: 18 },
                 1200: { slidesPerView: 6, spaceBetween: 24 },
             }}
-            aria-label="Resumen del Sistema Jurídico"
+            aria-label="Resumen de Normativa Virtual"
         >
-            {summaryCards.map((item) => (
-                <SwiperSlide key={item.title} className="h-auto">
-                    <CardBox className={`${item.background} h-full border-none shadow-none`}>
-                        <div className="text-center transition-transform duration-200 ease-in-out hover:scale-105">
-                            <div className="flex justify-center">
-                                <img src={item.image} width={50} height={50} className="mb-3" alt="" aria-hidden="true" />
+            {cards.map((item) => {
+                const style = toneStyles[item.tone];
+                const Icon = cardIcons[item.key] ?? ChartNoAxesColumnIncreasing;
+
+                return (
+                    <SwiperSlide key={item.key} className="h-auto">
+                        <CardBox className={`${style.background} h-full border-none shadow-none`}>
+                            <div className="text-center transition-transform duration-200 ease-in-out hover:scale-105">
+                                <div className="flex justify-center">
+                                    <span
+                                        className={`mb-3 flex size-[50px] items-center justify-center rounded-2xl bg-white/65 ${style.text} dark:bg-white/10`}
+                                    >
+                                        <Icon className="size-7" strokeWidth={1.8} aria-hidden="true" />
+                                    </span>
+                                </div>
+                                <p className={`mb-1 font-semibold ${style.text}`}>{item.title}</p>
+                                <p className={`text-lg font-semibold ${style.text}`}>{item.value.toLocaleString('es-BO')}</p>
                             </div>
-                            <p className={`mb-1 font-semibold ${item.text}`}>{item.title}</p>
-                            <p className={`text-lg font-semibold ${item.text}`}>{item.value}</p>
-                        </div>
-                    </CardBox>
-                </SwiperSlide>
-            ))}
+                        </CardBox>
+                    </SwiperSlide>
+                );
+            })}
         </Swiper>
     );
 }

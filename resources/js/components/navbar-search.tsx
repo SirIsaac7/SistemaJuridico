@@ -11,7 +11,7 @@ interface SearchItem {
 }
 
 const searchItems: SearchItem[] = [
-    { title: 'Panel principal', description: 'Resumen del Sistema Jurídico', href: '/dashboard', icon: LayoutDashboard },
+    { title: 'Panel principal', description: 'Resumen de Normativa Virtual', href: '/dashboard', icon: LayoutDashboard },
     { title: 'Mi perfil', description: 'Datos personales de la cuenta', href: '/settings/profile', icon: UserRound },
     { title: 'Contraseña', description: 'Seguridad y acceso', href: '/settings/password', icon: KeyRound },
 ];
@@ -47,7 +47,7 @@ export function NavbarSearch({ placeholder = 'Buscar en el sistema...' }: Navbar
                 type="search"
                 value={query}
                 placeholder={placeholder}
-                aria-label="Buscar en el Sistema Jurídico"
+                aria-label="Buscar en Normativa Virtual"
                 autoComplete="off"
                 className="border-border bg-background h-10 rounded-xl pr-4 pl-10 shadow-none focus-visible:border-[#5d87ff] focus-visible:ring-[#5d87ff]/20"
                 onFocus={() => setIsOpen(true)}

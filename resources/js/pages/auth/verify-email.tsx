@@ -43,7 +43,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
 
                     <ol className="mt-5 grid gap-3 text-sm text-[#526178] dark:text-[#b8c4d8]">
                         <li className="flex gap-3">
-                            <span className="font-bold text-[#5d87ff]">1.</span>Abre el mensaje enviado por Sistema Jurídico.
+                            <span className="font-bold text-[#5d87ff]">1.</span>Abre el mensaje enviado por Normativa Virtual.
                         </li>
                         <li className="flex gap-3">
                             <span className="font-bold text-[#5d87ff]">2.</span>Presiona “Verificar mi correo”.

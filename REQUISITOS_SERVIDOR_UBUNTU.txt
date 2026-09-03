@@ -1,0 +1,814 @@
+REQUISITOS Y PRECONFIGURACIÓN DEL SERVIDOR UBUNTU
+NORMATIVA VIRTUAL - LARAVEL 12 + REACT 19
+=================================================
+
+Objetivo
+--------
+Este documento indica qué debe instalarse y prepararse en el servidor físico
+ANTES de copiar o clonar el proyecto. Los comandos están escritos para Ubuntu
+Server 24.04 LTS. Redis se ejecutará mediante Docker, no como paquete nativo.
+No contiene contraseñas reales y ningún comando de este archivo fue ejecutado
+automáticamente en el servidor.
+
+IMPORTANTE: ejecutar los bloques en orden y leer la explicación anterior a cada
+uno. Los valores DOMINIO_REAL, USUARIO_DEPLOY y CONTRASENA_SEGURA son marcadores;
+deben reemplazarse. No copiar literalmente contraseñas de ejemplo.
+
+
+1. PLATAFORMA RECOMENDADA
+-------------------------
+
+- Ubuntu Server 24.04 LTS de 64 bits.
+- Arquitectura amd64/x86_64 o arm64 compatible con Node y PHP.
+- Como base inicial: 2 vCPU y 4 GB de RAM.
+- Disco SSD. El tamaño debe calcularse principalmente por los archivos del
+  módulo Libros; el sistema permite cargas de hasta 500 MB por archivo.
+- Espacio adicional separado para copias de seguridad.
+- Dirección IP pública fija si el servidor estará expuesto a Internet.
+
+Ubuntu 24.04 LTS se recomienda porque incluye PHP 8.3, que coincide con el PHP
+8.3 usado actualmente en desarrollo, y recibe mantenimiento estándar hasta 2029.
+
+Antes de instalar cualquier cosa, comprobar el sistema:
+
+cat /etc/os-release
+uname -m
+lsblk
+free -h
+df -h
+
+Resultado esperado: Ubuntu 24.04 LTS y arquitectura x86_64/amd64 o arm64. Si el
+servidor tiene Ubuntu 22.04, 26.04 u otra versión, no ejecutar a ciegas los nombres
+de paquetes php8.3: primero conviene instalar/reinstalar Ubuntu 24.04 LTS o adaptar
+la guía a esa versión concreta.
+
+
+2. SOFTWARE QUE DEBE ESTAR INSTALADO
+------------------------------------
+
+Obligatorio para ejecutar la aplicación:
+
+- Nginx.
+- PHP 8.3 CLI.
+- PHP 8.3 FPM.
+- Extensiones PHP:
+  php8.3-bcmath
+  php8.3-cli
+  php8.3-common
+  php8.3-curl
+  php8.3-fpm
+  php8.3-gd
+  php8.3-intl
+  php8.3-mbstring
+  php8.3-mysql
+  php8.3-opcache
+  php8.3-readline
+  php8.3-xml
+  php8.3-zip
+  La instalación común de PHP también proporciona Ctype, DOM, Fileinfo,
+  Filter, Hash, OpenSSL, PCRE, PDO, Session y Tokenizer.
+- Composer 2.x.
+- MySQL Server 8.x.
+- Docker Engine y Docker Compose Plugin; dentro de Docker se usará Redis 7.4.
+- Supervisor, para mantener activo el trabajador de colas.
+- Git, curl, unzip y ca-certificates.
+- Node.js 22 LTS y npm, para coincidir con Node 22 usado en desarrollo y compilar
+  React/Vite durante el despliegue. No ejecutar "npm run dev" en producción.
+- Certbot y python3-certbot-nginx para HTTPS, si no se utiliza otro proveedor
+  de certificados o proxy.
+
+PASO 2.1 - Actualizar Ubuntu e instalar utilidades base
+
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y ca-certificates curl git gnupg lsb-release unzip software-properties-common
+
+Explicación: instala parches de seguridad y herramientas para descargar paquetes,
+validar firmas, clonar el proyecto y descomprimir archivos.
+
+PASO 2.2 - Instalar Nginx, MySQL y Supervisor
+
+sudo apt install -y nginx mysql-server supervisor
+sudo systemctl enable --now nginx
+sudo systemctl enable --now mysql
+sudo systemctl enable --now supervisor
+
+Explicación: Nginx recibirá las solicitudes web, MySQL guardará los datos y las
+sesiones, y Supervisor mantendrá activo el trabajador de correos y colas.
+
+PASO 2.3 - Instalar PHP 8.3 y todas las extensiones del proyecto
+
+sudo apt install -y php8.3-cli php8.3-fpm php8.3-bcmath php8.3-curl php8.3-gd php8.3-intl php8.3-mbstring php8.3-mysql php8.3-opcache php8.3-readline php8.3-xml php8.3-zip
+sudo systemctl enable --now php8.3-fpm
+
+Explicación: Laravel 12 requiere PHP 8.2 o superior. PHP 8.3 coincide con el
+entorno local. GD se usa para generar vistas previas de imágenes; pdo_mysql para
+MySQL; cURL, XML, Mbstring, Intl y Zip son requeridos por Laravel/Composer.
+
+Comprobar PHP:
+
+php -v
+php -m | sort
+systemctl status php8.3-fpm --no-pager
+
+"php -m" debe mostrar, entre otras: bcmath, ctype, curl, dom, fileinfo, filter,
+gd, hash, intl, mbstring, openssl, pcre, PDO, pdo_mysql, session, tokenizer, xml
+y zip.
+
+PASO 2.4 - Instalar Composer 2 verificando su instalador
+
+cd /tmp
+EXPECTED_CHECKSUM="$(curl -fsSL https://composer.github.io/installer.sig)"
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+ACTUAL_CHECKSUM="$(php -r 'echo hash_file("sha384", "composer-setup.php");')"
+if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]; then echo "ERROR: instalador de Composer inválido"; rm composer-setup.php; exit 1; fi
+sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+rm composer-setup.php
+composer --version
+
+Explicación: descarga Composer desde su fuente oficial, compara su firma SHA-384
+y lo instala globalmente en /usr/local/bin/composer.
+
+PASO 2.5 - Instalar Node.js 22 y npm
+
+cd /tmp
+curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
+sudo -E bash nodesource_setup.sh
+sudo apt install -y nodejs
+rm nodesource_setup.sh
+node --version
+npm --version
+
+Resultado esperado: Node v22.x y npm 10.x o compatible. Node solo se necesita
+para "npm ci" y "npm run build". Nginx servirá después los archivos compilados;
+no se debe dejar "npm run dev" ni Vite ejecutándose en producción.
+
+PASO 2.6 - Instalar Docker Engine y Docker Compose desde el repositorio oficial
+
+No instalar el paquete redis-server. Redis funcionará solamente dentro de Docker.
+
+Eliminar paquetes Docker conflictivos si existieran:
+
+for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt remove -y "$pkg"; done
+
+Agregar la clave y el repositorio oficial de Docker:
+
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+Instalar y activar Docker:
+
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl enable --now docker
+sudo docker run --rm hello-world
+docker --version
+sudo docker compose version
+
+Explicación: instala Docker Engine, containerd y el comando moderno
+"docker compose". No se utiliza el script rápido get.docker.com porque el
+repositorio oficial es la opción adecuada para producción.
+
+No agregar www-data al grupo docker. Pertenecer al grupo docker equivale en la
+práctica a tener privilegios administrativos. Los comandos de infraestructura se
+ejecutarán con sudo por un administrador.
+
+PASO 2.7 - Instalar Certbot
+
+sudo apt install -y certbot python3-certbot-nginx
+
+Explicación: permite emitir y renovar el certificado HTTPS cuando el dominio ya
+apunte al servidor.
+
+PASO 2.8 - Comprobación general
+
+php -v
+composer --version
+node --version
+npm --version
+nginx -v
+mysql --version
+supervisord --version
+docker --version
+docker compose version
+
+
+3. DOMINIO, DNS, RED Y HTTPS
+----------------------------
+
+Antes de copiar el proyecto:
+
+1. Comprar o definir el dominio final.
+2. Crear registros DNS A y/o AAAA hacia la IP del servidor.
+3. Configurar el hostname del servidor.
+4. Permitir en el firewall solamente lo necesario:
+   - SSH: puerto 22, idealmente limitado a IPs administrativas.
+   - HTTP: puerto 80.
+   - HTTPS: puerto 443.
+5. No exponer a Internet los puertos 3306 de MySQL ni 6379 de Redis.
+6. Instalar el certificado TLS cuando el DNS ya resuelva hacia el servidor.
+7. Redirigir todo HTTP hacia HTTPS.
+
+HTTPS es obligatorio para las cookies seguras del control de dispositivos y
+para que la geolocalización del clima funcione fuera de localhost.
+
+Configurar hora del servidor en UTC; la aplicación mostrará America/La_Paz según
+su propia configuración:
+
+sudo timedatectl set-timezone UTC
+timedatectl
+
+Configurar UFW sin perder primero el acceso SSH:
+
+sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'
+sudo ufw enable
+sudo ufw status verbose
+
+No crear reglas para 3306 ni 6379. Si SSH utiliza un puerto distinto de 22,
+autorizar ese puerto antes de habilitar UFW.
+
+Comprobar DNS cuando ya se haya creado el registro A:
+
+getent hosts DOMINIO_REAL
+
+El resultado debe contener la IP pública del servidor antes de solicitar HTTPS.
+
+
+4. USUARIO Y DIRECTORIO DE LA APLICACIÓN
+-----------------------------------------
+
+- Crear un usuario de despliegue sin acceso directo como root.
+- Autenticar SSH mediante clave pública y desactivar el acceso root por SSH.
+- Preparar una ruta, por ejemplo:
+
+  /var/www/normativa-virtual
+
+- El proyecto completo no debe ser público. Nginx debe servir únicamente:
+
+  /var/www/normativa-virtual/public
+
+- El usuario del servidor web (normalmente www-data) deberá poder escribir solo
+  en estos directorios:
+
+  /var/www/normativa-virtual/storage
+  /var/www/normativa-virtual/bootstrap/cache
+
+- No usar permisos 777.
+- No guardar archivos subidos dentro de public. Los libros actuales deben quedar
+  en storage/app/private/libros cuando LIBROS_FILESYSTEM_DISK=local.
+
+Crear un usuario de despliegue si todavía no existe:
+
+sudo adduser deploy
+sudo usermod -aG www-data deploy
+sudo install -d -o deploy -g www-data -m 2755 /var/www/normativa-virtual
+
+Explicación: "deploy" administrará el código y www-data ejecutará Nginx/PHP-FPM.
+El bit setgid del directorio ayuda a conservar el grupo www-data en archivos
+nuevos. Configurar la clave SSH de deploy antes de desactivar contraseñas SSH.
+
+Comandos orientativos después de que exista la estructura de directorios:
+
+sudo chown -R deploy:www-data /var/www/normativa-virtual
+sudo find /var/www/normativa-virtual -type d -exec chmod 755 {} \;
+sudo find /var/www/normativa-virtual -type f -exec chmod 644 {} \;
+sudo chown -R www-data:www-data /var/www/normativa-virtual/storage /var/www/normativa-virtual/bootstrap/cache
+sudo chmod -R ug+rwX /var/www/normativa-virtual/storage /var/www/normativa-virtual/bootstrap/cache
+
+
+5. BASE DE DATOS MYSQL
+----------------------
+
+Preparar antes del traslado:
+
+- Crear una base de datos exclusiva con charset utf8mb4 y collation
+  utf8mb4_unicode_ci.
+- Crear un usuario exclusivo para la aplicación.
+- Concederle permisos solamente sobre esa base de datos.
+- Usar una contraseña larga y aleatoria.
+- Mantener MySQL escuchando en localhost si está en el mismo servidor.
+- No utilizar root como usuario de Laravel.
+- Definir una política de respaldos automáticos y probar su restauración.
+
+Aplicar la configuración segura inicial de MySQL:
+
+sudo mysql_secure_installation
+
+Explicación: permite eliminar usuarios anónimos, la base de prueba y accesos root
+remotos. Leer cada pregunta; no desactivar el acceso administrativo local que se
+necesitará para crear la base.
+
+Ejemplo conceptual; reemplazar nombres y contraseña:
+
+sudo mysql
+
+CREATE DATABASE normativa_virtual CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'normativa_app'@'localhost' IDENTIFIED BY 'CONTRASENA-ALEATORIA';
+GRANT ALL PRIVILEGES ON normativa_virtual.* TO 'normativa_app'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+
+Probar el usuario creado sin escribir la contraseña en la línea de comandos:
+
+mysql -u normativa_app -p normativa_virtual
+
+Dentro de MySQL ejecutar "SELECT DATABASE();" y después "EXIT;". La contraseña
+real se guardará únicamente en el .env del servidor.
+
+El proyecto necesita conservar SESSION_DRIVER=database porque la sesión única y
+el control de dispositivos utilizan la tabla sessions.
+
+
+6. REDIS
+--------
+
+Redis es necesario porque el proyecto tiene:
+
+- CACHE_STORE=redis
+- QUEUE_CONNECTION=redis
+- REDIS_CLIENT=predis
+
+Configuración previa:
+
+- Se utilizará el archivo compose.yaml que ya existe en este proyecto.
+- La imagen configurada es redis:7.4-alpine.
+- Redis tiene persistencia AOF y volumen Docker persistente.
+- El puerto está publicado solamente como 127.0.0.1:6379:6379.
+- Docker reiniciará Redis automáticamente con restart: unless-stopped.
+- No modificar el puerto a 0.0.0.0 y no abrir 6379 en el router/firewall.
+
+Estos comandos se ejecutan DESPUÉS de copiar el proyecto al servidor:
+
+cd /var/www/normativa-virtual
+sudo docker compose config
+sudo docker compose pull redis
+sudo docker compose up -d redis
+sudo docker compose ps
+sudo docker exec sistema-juridico-redis redis-cli PING
+
+Resultado esperado: el contenedor debe aparecer "healthy" y PING debe devolver
+PONG. Para revisar problemas:
+
+sudo docker compose logs --tail=100 redis
+
+No ejecutar "docker compose down -v": la opción -v elimina el volumen persistente
+de Redis. Un reinicio normal del servidor conservará el contenedor y sus datos.
+
+Predis ya está incluido en composer.json, por lo que no es indispensable instalar
+la extensión PHP phpredis.
+
+
+7. NGINX Y PHP-FPM
+------------------
+
+Preparar un sitio Nginx con estas reglas esenciales:
+
+- server_name con el dominio real.
+- root apuntando exclusivamente a /var/www/normativa-virtual/public.
+- index index.php.
+- En location / usar:
+
+  try_files $uri $uri/ /index.php?$query_string;
+
+- Enviar solamente index.php al socket de PHP 8.3 FPM:
+
+  fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+
+- Bloquear archivos ocultos, excepto .well-known para certificados.
+- Añadir cabeceras X-Frame-Options SAMEORIGIN y
+  X-Content-Type-Options nosniff.
+- Ocultar la versión de Nginx y PHP.
+
+Cuando el directorio del proyecto ya exista, crear el sitio:
+
+sudo nano /etc/nginx/sites-available/normativa-virtual
+
+Contenido base; reemplazar DOMINIO_REAL:
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name DOMINIO_REAL www.DOMINIO_REAL;
+    root /var/www/normativa-virtual/public;
+
+    index index.php;
+    charset utf-8;
+    server_tokens off;
+
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+
+    client_max_body_size 510M;
+    client_body_timeout 300s;
+    fastcgi_read_timeout 300s;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    location ~ ^/index\.php(/|$) {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_hide_header X-Powered-By;
+    }
+
+    location ~ \.php$ {
+        return 404;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+
+Guardar el archivo y habilitarlo:
+
+sudo ln -s /etc/nginx/sites-available/normativa-virtual /etc/nginx/sites-enabled/normativa-virtual
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl reload nginx
+
+La eliminación anterior afecta únicamente al sitio de bienvenida "default" de
+Nginx. No ejecutarla si ese archivo fue reutilizado para otro sitio real.
+
+El módulo Libros admite hasta 512000 KB (500 MB). Configurar coherentemente:
+
+En Nginx:
+
+client_max_body_size 510M;
+client_body_timeout 300s;
+fastcgi_read_timeout 300s;
+
+En /etc/php/8.3/fpm/php.ini:
+
+upload_max_filesize = 500M
+post_max_size = 510M
+max_execution_time = 300
+max_input_time = 300
+memory_limit = 512M
+expose_php = Off
+
+Editar el archivo con:
+
+sudo nano /etc/php/8.3/fpm/php.ini
+
+Revisar la RAM disponible antes de aumentar memory_limit y reiniciar PHP-FPM y
+Nginx después de modificar su configuración. Validar antes con:
+
+sudo nginx -t
+sudo systemctl restart php8.3-fpm
+sudo systemctl reload nginx
+
+Cuando el dominio ya resuelva, Nginx esté funcionando y el proyecto responda por
+HTTP, activar HTTPS:
+
+sudo certbot --nginx -d DOMINIO_REAL -d www.DOMINIO_REAL
+sudo certbot renew --dry-run
+systemctl status certbot.timer --no-pager
+
+Si no se utilizará el subdominio www, eliminar "-d www.DOMINIO_REAL" tanto del
+comando como de server_name.
+
+
+8. TRABAJADOR DE COLAS
+----------------------
+
+Los correos de verificación y de reseteo de dispositivo se envían mediante cola.
+Sin un trabajador activo, los mensajes quedarán pendientes.
+
+Supervisor debe preparar un proceso persistente equivalente a:
+
+php /var/www/normativa-virtual/artisan queue:work redis --queue=mail,default --sleep=3 --tries=3 --backoff=60 --timeout=90 --max-time=3600
+
+Crear la configuración después de copiar el proyecto:
+
+sudo nano /etc/supervisor/conf.d/normativa-virtual-worker.conf
+
+Contenido:
+
+[program:normativa-virtual-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=/usr/bin/php /var/www/normativa-virtual/artisan queue:work redis --queue=mail,default --sleep=3 --tries=3 --backoff=60 --timeout=90 --max-time=3600
+directory=/var/www/normativa-virtual
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/www/normativa-virtual/storage/logs/queue-worker.log
+stopwaitsecs=120
+
+Activarlo:
+
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start normativa-virtual-worker:*
+sudo supervisorctl status
+
+Condiciones:
+
+- Ejecutarlo como www-data o un usuario de servicio con permisos correctos.
+- autostart=true y autorestart=true.
+- Guardar logs dentro de storage/logs.
+- Ejecutar "php artisan queue:restart" después de cada actualización.
+- Vigilar periódicamente "php artisan queue:failed".
+
+
+9. CORREO SALIENTE
+------------------
+
+Preparar un proveedor SMTP real antes del estreno:
+
+- Host, puerto, cifrado TLS, usuario y contraseña de aplicación.
+- Dirección remitente autorizada.
+- Registros DNS SPF, DKIM y DMARC si se utiliza un dominio propio.
+- El servidor debe permitir conexiones HTTPS y SMTP salientes.
+- No usar MAIL_MAILER=log en producción.
+- Probar verificación de correo, recuperación de contraseña y aviso de reseteo.
+
+Gmail puede servir para pruebas o bajo volumen, pero para producción sostenida se
+recomienda un proveedor de correo transaccional.
+
+
+10. ARCHIVO .env DE PRODUCCIÓN
+------------------------------
+
+Crear el .env directamente en el servidor. No copiar el .env local, no subirlo a
+Git y no incluirlo en respaldos públicos. Preparar como mínimo:
+
+APP_NAME="Normativa Virtual"
+APP_ENV=production
+APP_KEY=                 # generar una sola vez en el servidor
+APP_DEBUG=false
+APP_TIMEZONE=UTC
+APP_DISPLAY_TIMEZONE=America/La_Paz
+APP_URL=https://dominio-real.com
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=normativa_virtual
+DB_USERNAME=normativa_app
+DB_PASSWORD=             # secreto real solo en el servidor
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_SECURE_COOKIE=true
+SESSION_DOMAIN=null      # o el dominio exacto si la arquitectura lo requiere
+
+ACTIVE_DEVICE_LIMIT=1
+DEVICE_COOKIE_NAME=device_token
+DEVICE_COOKIE_LIFETIME=2628000
+DEVICE_COOKIE_SECURE=true
+
+CACHE_STORE=redis
+QUEUE_CONNECTION=redis
+REDIS_CLIENT=predis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null      # usar contraseña/TLS si Redis no es exclusivamente local
+REDIS_PORT=6379
+
+FILESYSTEM_DISK=local
+LIBROS_FILESYSTEM_DISK=local
+
+MAIL_MAILER=smtp
+MAIL_HOST=
+MAIL_PORT=587
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=
+MAIL_FROM_NAME="Normativa Virtual"
+
+VITE_APP_NAME="${APP_NAME}"
+
+APP_KEY debe generarse una sola vez con "php artisan key:generate" cuando el
+proyecto ya esté en el servidor. Nunca regenerarla después de tener información
+cifrada en producción.
+
+
+11. ALMACENAMIENTO Y RESPALDOS
+------------------------------
+
+Antes de poner el sistema en uso:
+
+- Definir cuánto disco puede consumir cada usuario y establecer alertas.
+- Respaldar diariamente MySQL y storage/app/private.
+- El historial de libros no queda respaldado solo con una copia de la base de
+  datos: los archivos privados también son indispensables.
+- Mantener al menos una copia cifrada fuera del servidor.
+- Establecer retención, por ejemplo diaria, semanal y mensual.
+- Probar una restauración completa antes del lanzamiento.
+- Si en el futuro se usa MinIO/S3, configurar credenciales, bucket privado,
+  políticas y copias de seguridad antes de cambiar LIBROS_FILESYSTEM_DISK.
+
+
+12. SEGURIDAD PREVIA
+--------------------
+
+Instalar protección y actualizaciones automáticas de seguridad:
+
+sudo apt install -y fail2ban unattended-upgrades
+sudo systemctl enable --now fail2ban
+sudo dpkg-reconfigure -plow unattended-upgrades
+
+Explicación: Fail2ban ayuda a bloquear intentos repetidos contra servicios como
+SSH y unattended-upgrades aplica actualizaciones de seguridad. Revisar su política
+antes de habilitar reinicios automáticos en un servidor que deba operar 24/7.
+
+- Aplicar actualizaciones de seguridad de Ubuntu automáticamente o mediante una
+  ventana de mantenimiento controlada.
+- Usar SSH con claves, sin contraseña, y desactivar login root remoto.
+- Configurar UFW y protección contra intentos repetidos, por ejemplo Fail2ban.
+- Mantener APP_DEBUG=false.
+- No mostrar listados de directorios en Nginx.
+- No permitir acceso web a .env, vendor, storage privado, base de datos o Git.
+- Guardar secretos en .env con permisos 640 o más restrictivos.
+- Separar cuentas de base de datos, despliegue y administración.
+- Definir monitoreo de CPU, RAM, disco, MySQL, Redis, PHP-FPM, colas, certificado
+  TLS y la ruta de salud /up.
+- Configurar rotación de logs para Nginx, PHP, Supervisor y Laravel.
+
+
+13. COMPROBACIÓN ANTES DE COPIAR EL PROYECTO
+--------------------------------------------
+
+[ ] Ubuntu actualizado y con zona horaria administrativa definida.
+[ ] Nginx, PHP 8.3 FPM y todas las extensiones instaladas.
+[ ] Composer 2 instalado.
+[ ] Node 22 LTS y npm instalados.
+[ ] Docker Engine y Docker Compose Plugin instalados y activos.
+[ ] MySQL creado con base y usuario exclusivos.
+[ ] Docker preparado; Redis se levantará después de copiar compose.yaml.
+[ ] Supervisor instalado.
+[ ] Dominio apuntando al servidor.
+[ ] Puertos 80/443 abiertos; 3306/6379 cerrados al público.
+[ ] Directorio /var/www/normativa-virtual preparado.
+[ ] Nginx preparado para servir solamente el directorio public.
+[ ] Límites de carga de 500 MB configurados en Nginx y PHP-FPM.
+[ ] Certificado HTTPS previsto o instalado.
+[ ] Credenciales SMTP preparadas.
+[ ] .env de producción preparado sin reutilizar secretos locales.
+[ ] Estrategia de respaldo de MySQL y storage privado preparada.
+[ ] Supervisor preparado para el trabajador de las colas mail,default.
+[ ] Existe espacio suficiente para builds, logs, respaldos y archivos privados.
+
+Cuando todo lo anterior esté listo, recién corresponde copiar o clonar el proyecto.
+
+
+14. COMANDOS DESPUÉS DE COPIAR EL PROYECTO
+------------------------------------------
+
+Esta sección no se ejecuta antes del traslado. Se incluye para que el servidor
+termine funcionando igual que el entorno local.
+
+Entrar como usuario deploy y ubicarse en el proyecto:
+
+cd /var/www/normativa-virtual
+
+Confirmar que están presentes artisan, composer.json, package.json, compose.yaml,
+app, config, database, public, resources y routes. No copiar estas carpetas desde
+Windows: vendor, node_modules y public/build. Se generarán nuevamente en Ubuntu.
+
+Crear la configuración de producción:
+
+cp .env.example .env
+nano .env
+chmod 640 .env
+
+Completar el bloque indicado en la sección 10 antes de continuar. No copiar el
+.env local con URL de ngrok ni sus contraseñas.
+
+Instalar dependencias PHP exactamente desde composer.lock:
+
+composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+Instalar dependencias JavaScript exactamente desde package-lock.json y compilar:
+
+npm ci
+npm run build
+
+No usar "npm install" en el despliegue y no ejecutar "composer run dev". Los
+archivos de producción quedarán en public/build.
+
+Generar la llave solamente en una instalación nueva:
+
+php artisan key:generate
+
+No volver a ejecutar key:generate una vez que producción tenga datos cifrados.
+
+Levantar Redis con el compose del proyecto:
+
+sudo docker compose config
+sudo docker compose pull redis
+sudo docker compose up -d redis
+sudo docker compose ps
+sudo docker exec sistema-juridico-redis redis-cli PING
+
+Preparar la base de datos. Para una base NUEVA y vacía:
+
+php artisan migrate --force
+php artisan db:seed --class=RolePermissionSeeder --force
+
+Si se trasladarán usuarios y datos existentes desde local, importar primero un
+respaldo SQL consistente en la base normativa_virtual y después ejecutar:
+
+php artisan migrate --force
+php artisan db:seed --class=RolePermissionSeeder --force
+
+No ejecutar migrate:fresh: eliminaría todas las tablas y datos. Para conservar el
+sistema actual también se debe copiar íntegramente storage/app/private; la base de
+datos por sí sola no contiene los libros subidos.
+
+Crear el enlace de archivos públicos y asegurar directorios:
+
+php artisan storage:link
+mkdir -p storage/app/private/libros storage/logs bootstrap/cache
+sudo chown -R deploy:www-data /var/www/normativa-virtual
+sudo chown -R www-data:www-data storage bootstrap/cache
+sudo chmod -R ug+rwX storage bootstrap/cache
+
+Limpiar y crear cachés optimizadas:
+
+php artisan optimize:clear
+php artisan optimize
+
+Validar que Laravel inicia y puede conectarse:
+
+php artisan about
+php artisan migrate:status
+php artisan route:list --name=login
+php artisan config:show database.default
+php artisan config:show session.driver
+php artisan config:show cache.default
+php artisan config:show queue.default
+
+Activar el worker según la sección 8 y recargar servicios:
+
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl restart normativa-virtual-worker:*
+sudo systemctl restart php8.3-fpm
+sudo nginx -t
+sudo systemctl reload nginx
+
+Después de que DNS funcione, activar HTTPS:
+
+sudo certbot --nginx -d DOMINIO_REAL -d www.DOMINIO_REAL
+sudo certbot renew --dry-run
+
+Pruebas finales:
+
+curl -I https://DOMINIO_REAL/up
+sudo supervisorctl status
+sudo docker compose ps
+sudo docker exec sistema-juridico-redis redis-cli PING
+php artisan queue:failed
+tail -n 100 storage/logs/laravel.log
+
+Comprobar desde un navegador: registro, verificación de correo, login, sesión
+única, dispositivo autorizado, reseteo de dispositivo, subida/visualización
+privada de archivos y clima local. El navegador debe recibir siempre HTTPS.
+
+
+15. REFERENCIAS OFICIALES
+-------------------------
+
+Laravel 12 - despliegue y requisitos:
+https://laravel.com/docs/12.x/deployment
+
+Laravel 12 - colas y Supervisor:
+https://laravel.com/docs/12.x/queues
+
+Laravel 12 - almacenamiento:
+https://laravel.com/docs/12.x/filesystem
+
+Versiones y ciclo LTS de Node.js:
+https://nodejs.org/en/about/previous-releases
+
+Ciclo de soporte de Ubuntu:
+https://ubuntu.com/about/release-cycle
+
+Instalación oficial de Docker Engine en Ubuntu:
+https://docs.docker.com/engine/install/ubuntu/
+
+Instalación oficial de Composer:
+https://getcomposer.org/download/

@@ -1,8 +1,9 @@
+import AppLogoIcon from '@/components/app-logo-icon';
 import { NavbarSearch } from '@/components/navbar-search';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { type BreadcrumbItem as BreadcrumbItemType } from '@/types';
-import { Moon, Scale, Sun } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
@@ -42,9 +43,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                     </div>
                     <div className="flex min-w-0 items-center gap-2 md:hidden">
                         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#5d87ff]/10 text-[#5d87ff]">
-                            <Scale className="size-5" strokeWidth={1.8} />
+                            <AppLogoIcon className="size-6" />
                         </span>
-                        <span className="text-foreground truncate text-sm font-bold sm:text-base">Sistema Jurídico</span>
+                        <span className="text-foreground truncate text-sm font-bold sm:text-base">Normativa Virtual</span>
                     </div>
                 </div>
 

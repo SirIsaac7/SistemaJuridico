@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserDeviceResetController;
 use App\Http\Controllers\Admin\UserStatusController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Libros\ArchivoAdministrativoContenidoController;
 use App\Http\Controllers\Libros\ArchivoConcedidoContenidoController;
 use App\Http\Controllers\Libros\ArchivoConcedidoVisorController;
@@ -31,9 +32,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::get('roles/{role}/permissions', [RolePermissionController::class, 'edit'])
         ->name('roles.permissions.edit');

@@ -33,6 +33,7 @@ class DeviceResetCompleted extends Notification implements ShouldQueueAfterCommi
         $viewData = [
             'name' => $notifiable->name,
             'loginUrl' => route('login'),
+            'brandIconUrl' => asset('assets/landing/normativa-virtual-email.png'),
             'year' => now()->year,
         ];
 

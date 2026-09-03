@@ -1,7 +1,7 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { MonitorSmartphone } from 'lucide-react';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import { Mail, MonitorSmartphone } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import HeadingSmall from '@/components/heading-small';
@@ -29,17 +29,14 @@ interface AuthorizedDevice {
 }
 
 interface ProfileProps {
-    mustVerifyEmail: boolean;
-    status?: string;
     device: AuthorizedDevice | null;
 }
 
-export default function Profile({ mustVerifyEmail, status, device }: ProfileProps) {
+export default function Profile({ device }: ProfileProps) {
     const { auth } = usePage<SharedData>().props;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
         name: auth.user.name,
-        email: auth.user.email,
     });
 
     const submit: FormEventHandler = (e) => {
@@ -54,7 +51,7 @@ export default function Profile({ mustVerifyEmail, status, device }: ProfileProp
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Información del perfil" description="Actualiza tu nombre y correo electrónico" />
+                    <HeadingSmall title="Información del perfil" description="Actualiza tu nombre y consulta el correo de tu cuenta" />
 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">
@@ -74,43 +71,12 @@ export default function Profile({ mustVerifyEmail, status, device }: ProfileProp
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Correo electrónico</Label>
-
-                            <Input
-                                id="email"
-                                type="email"
-                                className="mt-1 block w-full"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                required
-                                autoComplete="username"
-                                placeholder="Correo electrónico"
-                            />
-
-                            <InputError className="mt-2" message={errors.email} />
-                        </div>
-
-                        {mustVerifyEmail && auth.user.email_verified_at === null && (
-                            <div>
-                                <p className="mt-2 text-sm text-neutral-800">
-                                    Tu correo electrónico todavía no fue verificado.{' '}
-                                    <Link
-                                        href={route('verification.send')}
-                                        method="post"
-                                        as="button"
-                                        className="rounded-md text-sm text-neutral-600 underline hover:text-neutral-900 focus:ring-2 focus:ring-offset-2 focus:outline-hidden"
-                                    >
-                                        Haz clic aquí para reenviar el correo de verificación.
-                                    </Link>
-                                </p>
-
-                                {status === 'verification-link-sent' && (
-                                    <div className="mt-2 text-sm font-medium text-green-600">
-                                        Se envió un nuevo enlace de verificación a tu correo electrónico.
-                                    </div>
-                                )}
+                            <Label>Correo electrónico</Label>
+                            <div className="flex min-h-11 items-center gap-3 rounded-md border border-[#d9e0ea] bg-[#f5f7fa] px-3 py-2.5 text-sm text-[#526178] dark:border-[#2e3a50] dark:bg-[#202b3d] dark:text-[#b7c3d7]">
+                                <Mail className="size-4 shrink-0 text-[#5d87ff]" aria-hidden="true" />
+                                <span className="truncate">{auth.user.email}</span>
                             </div>
-                        )}
+                        </div>
 
                         <div className="flex items-center gap-4">
                             <Button disabled={processing}>Guardar</Button>

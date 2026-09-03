@@ -143,7 +143,8 @@ class DeviceAccessTest extends TestCase
                     'html' => 'mail.device-reset-completed',
                     'text' => 'mail.device-reset-completed-text',
                 ]
-                && str_contains($html, 'Sistema Jurídico')
+                && str_contains($html, 'Normativa Virtual')
+                && str_contains($html, 'assets/landing/normativa-virtual-email.png')
                 && str_contains($html, 'Ya puedes iniciar sesión desde otro dispositivo y navegador.')
                 && str_contains($html, route('login'))
                 && str_contains($text, 'Ya puedes iniciar sesión desde otro dispositivo y navegador.')

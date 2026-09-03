@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" role="img" aria-labelledby="title">
+    <title id="title">Normativa Virtual</title>
+    <rect width="72" height="72" rx="16" fill="#1e2a4a"/>
+    <circle cx="36" cy="14" r="4" fill="#d4af37"/>
+    <path fill="#d4af37" d="M33.5 19h5v34h-5zM14 22h44v4H14zM19 24h4l-7 15h-4zm30 0h4l7 15h-4z"/>
+    <path fill="#d4af37" d="M8 38h20c0 6.1-4.5 11-10 11S8 44.1 8 38Zm36 0h20c0 6.1-4.5 11-10 11s-10-4.9-10-11ZM27 52h18v5H27z"/>
+</svg>

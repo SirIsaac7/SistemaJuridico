@@ -44,7 +44,7 @@ class ProtectedFileResponseService
         imagecopyresampled($preview, $source, 0, 0, 0, 0, $width, $height, $sourceWidth, $sourceHeight);
         imagedestroy($source);
 
-        $watermark = 'Documento protegido - Sistema Juridico | Contenido de uso personal';
+        $watermark = 'Documento protegido - Normativa Virtual | Contenido de uso personal';
         $color = imagecolorallocatealpha($preview, 35, 45, 65, 72);
         $stepX = max(260, strlen($watermark) * imagefontwidth(3) + 90);
 

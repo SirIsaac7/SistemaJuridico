@@ -8,7 +8,7 @@
 </head>
 <body style="margin: 0; padding: 0; background-color: #f3f6fa; color: #2a3547; font-family: Arial, Helvetica, sans-serif;">
     <div style="display: none; max-height: 0; overflow: hidden; opacity: 0; color: transparent;">
-        Confirma tu correo para activar tu acceso al Sistema Jurídico.
+        Confirma tu correo para activar tu acceso a Normativa Virtual.
     </div>
 
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width: 100%; background-color: #f3f6fa;">
@@ -20,10 +20,10 @@
                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                                 <tr>
                                     <td width="58" valign="middle">
-                                        <div style="width: 46px; height: 46px; line-height: 46px; border-radius: 50%; background-color: #d4af37; color: #1e2a4a; font-size: 16px; font-weight: 700; text-align: center;">SJ</div>
+                                        <img src="{{ isset($message) ? $message->embed(public_path('assets/landing/normativa-virtual-email.png')) : $brandIconUrl }}" width="46" height="46" alt="Normativa Virtual" style="display: block; width: 46px; height: 46px; border: 0; border-radius: 10px;">
                                     </td>
                                     <td valign="middle">
-                                        <div style="color: #ffffff; font-family: Georgia, 'Times New Roman', serif; font-size: 21px; font-weight: 700; letter-spacing: 0.4px;">Sistema Jurídico</div>
+                                        <div style="color: #ffffff; font-family: Georgia, 'Times New Roman', serif; font-size: 21px; font-weight: 700; letter-spacing: 0.4px;">Normativa Virtual</div>
                                         <div style="padding-top: 4px; color: #cbd3e3; font-size: 12px; letter-spacing: 0.8px; text-transform: uppercase;">Verificación de identidad</div>
                                     </td>
                                 </tr>
@@ -66,7 +66,7 @@
                 <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width: 100%; max-width: 600px;">
                     <tr>
                         <td align="center" style="padding: 22px 16px 0; color: #8a95a6; font-size: 12px; line-height: 1.6;">
-                            © {{ $year }} Sistema Jurídico. Todos los derechos reservados.<br>
+                            © {{ $year }} Normativa Virtual. Todos los derechos reservados.<br>
                             Este es un mensaje automático; no respondas a este correo.
                         </td>
                     </tr>

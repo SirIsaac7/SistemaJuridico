@@ -33,7 +33,7 @@ export default function Register() {
     };
 
     return (
-        <AuthSplitLayout view="register" title="Crea tu cuenta" description="Completa tus datos para comenzar a utilizar Sistema Jurídico.">
+        <AuthSplitLayout view="register" title="Crea tu cuenta" description="Completa tus datos para comenzar a utilizar Normativa Virtual.">
             <Head title="Crear cuenta" />
             <form className="flex flex-col gap-5" onSubmit={submit}>
                 <div className="grid gap-5">

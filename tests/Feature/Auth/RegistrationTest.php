@@ -5,6 +5,8 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use App\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Notifications\Channels\MailChannel;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -48,9 +50,30 @@ class RegistrationTest extends TestCase
                 && $notification->queue === 'mail'
                 && $notification->afterCommit === true
                 && $mail->subject === 'Verifica tu correo electrónico'
+                && str_contains($html, 'Normativa Virtual')
+                && str_contains($html, 'assets/landing/normativa-virtual-email.png')
                 && str_contains($html, 'Verificar mi correo')
                 && str_contains($html, 'no cambiará el dispositivo autorizado');
         });
+    }
+
+    public function test_verification_email_embeds_the_png_brand_image(): void
+    {
+        config()->set('mail.default', 'array');
+        Mail::purge();
+
+        $user = User::factory()->unverified()->make([
+            'email' => 'embedded-logo@example.com',
+        ]);
+        $user->id = 999;
+
+        app(MailChannel::class)->send($user, new VerifyEmail);
+
+        $sentMessage = Mail::mailer()->getSymfonyTransport()->messages()->first();
+        $email = $sentMessage->getOriginalMessage();
+
+        $this->assertStringContainsString('cid:', (string) $email->getHtmlBody());
+        $this->assertStringContainsString('Content-Type: image/png', $email->toString());
     }
 
     #[DataProvider('weakPasswords')]

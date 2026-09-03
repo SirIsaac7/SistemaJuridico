@@ -1,11 +1,11 @@
 CONFIGURACION PARA PRODUCCION
 ============================
 
-Cuando Sistema Juridico se publique en un dominio con HTTPS, revisar el archivo .env de produccion.
+Cuando Normativa Virtual se publique en un dominio con HTTPS, revisar el archivo .env de produccion.
 
 Configuracion recomendada:
 
-APP_NAME="Sistema Juridico"
+APP_NAME="Normativa Virtual"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://tu-dominio.com
@@ -32,7 +32,7 @@ MAIL_USERNAME=correo-remitente@gmail.com
 MAIL_PASSWORD="clave-de-aplicacion-de-google"
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=correo-remitente@gmail.com
-MAIL_FROM_NAME="Sistema Juridico"
+MAIL_FROM_NAME="Normativa Virtual"
 
 IMPORTANTE
 ----------
